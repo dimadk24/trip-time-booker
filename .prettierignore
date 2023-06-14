@@ -1,0 +1,8 @@
+# IDEs
+.idea/
+.vscode/
+
+# next.js build files
+.next
+
+pnpm-lock.yaml
