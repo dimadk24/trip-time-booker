@@ -1,10 +1,8 @@
-import ThirdPartyReact, {
-  Google,
-  Facebook,
-} from 'supertokens-auth-react/recipe/thirdparty'
+import ThirdPartyReact from 'supertokens-auth-react/recipe/thirdparty'
 import SessionReact from 'supertokens-auth-react/recipe/session'
-import { appInfo } from './appInfo'
 import Router from 'next/router'
+import { type WindowHandlerInterface } from 'supertokens-web-js/utils/windowHandler/types'
+import { appInfo } from './appInfo'
 
 export const frontendConfig = () => {
   return {
@@ -17,7 +15,7 @@ export const frontendConfig = () => {
       }),
       SessionReact.init(),
     ],
-    windowHandler: (oI: any) => {
+    windowHandler: (oI: WindowHandlerInterface) => {
       return {
         ...oI,
         location: {
