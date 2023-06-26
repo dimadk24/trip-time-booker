@@ -3,8 +3,8 @@ import { middleware } from 'supertokens-node/framework/express'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import supertokens from 'supertokens-node'
-import { getBackendConfig } from '../../../src/config/supertokens/backendConfig'
 import NextCors from 'nextjs-cors'
+import { getBackendConfig } from '../../../src/config/supertokens/backendConfig'
 import { API_DOMAIN } from '@/src/config/appConfig'
 
 supertokens.init(getBackendConfig())

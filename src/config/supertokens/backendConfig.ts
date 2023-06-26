@@ -2,8 +2,8 @@ import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import SessionNode from 'supertokens-node/recipe/session'
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import Dashboard from 'supertokens-node/recipe/dashboard'
-import { appInfo } from './appInfo'
 import { TypeInput } from 'supertokens-node/types'
+import { appInfo } from './appInfo'
 
 export const getBackendConfig = (): TypeInput => {
   return {
@@ -39,7 +39,9 @@ export const getBackendConfig = (): TypeInput => {
                   )
                 }
 
-                let response = await originalImplementation.signInUpPOST(input)
+                const response = await originalImplementation.signInUpPOST(
+                  input
+                )
 
                 if (response.status === 'OK') {
                   const accessToken = response.authCodeResponse.access_token

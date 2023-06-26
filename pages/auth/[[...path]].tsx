@@ -4,7 +4,7 @@ import { ThirdPartyPreBuiltUI } from 'supertokens-auth-react/recipe/thirdparty/p
 import { redirectToAuth } from 'supertokens-auth-react'
 import { canHandleRoute, getRoutingComponent } from 'supertokens-auth-react/ui'
 
-const SuperTokensComponentNoSSR = dynamic<{}>(
+const SuperTokensComponentNoSSR = dynamic<unknown>(
   new Promise((res) => res(() => getRoutingComponent([ThirdPartyPreBuiltUI]))),
   { ssr: false }
 )
