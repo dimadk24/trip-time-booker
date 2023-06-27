@@ -3,15 +3,14 @@ import SessionNode from 'supertokens-node/recipe/session'
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import Dashboard from 'supertokens-node/recipe/dashboard'
 import { TypeInput } from 'supertokens-node/types'
-import { appInfo } from './appInfo'
-import { postAuth } from '@/src/postAuth'
 import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   SUPERTOKENS_API_KEY,
   SUPERTOKENS_CONNECTION_URI,
 } from '../appConfig'
-import { Credentials } from '@/src/services/googleCalendar'
+import { appInfo } from './appInfo'
+import { postAuth } from '@/src/postAuth'
 
 export const getBackendConfig = (): TypeInput => {
   return {
