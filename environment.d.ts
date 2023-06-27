@@ -11,6 +11,9 @@ declare global {
       NEXT_PUBLIC_DOMAIN: string
 
       GOOGLE_MAPS_API_KEY: string
+      GOOGLE_CALENDAR_API_KEY:string
+
+      DEV_LOCAL_WEBHOOK_DOMAIN?: string
     }
   }
 }

@@ -4,13 +4,21 @@ import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import Dashboard from 'supertokens-node/recipe/dashboard'
 import { TypeInput } from 'supertokens-node/types'
 import { appInfo } from './appInfo'
+import { postAuth } from '@/src/postAuth'
+import {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  SUPERTOKENS_API_KEY,
+  SUPERTOKENS_CONNECTION_URI,
+} from '../appConfig'
+import { Credentials } from '@/src/services/googleCalendar'
 
 export const getBackendConfig = (): TypeInput => {
   return {
     framework: 'express',
     supertokens: {
-      connectionURI: process.env.SUPERTOKENS_CONNECTION_URI,
-      apiKey: process.env.SUPERTOKENS_API_KEY,
+      connectionURI: SUPERTOKENS_CONNECTION_URI,
+      apiKey: SUPERTOKENS_API_KEY,
     },
     appInfo,
     recipeList: [
@@ -18,8 +26,8 @@ export const getBackendConfig = (): TypeInput => {
         signInAndUpFeature: {
           providers: [
             ThirdPartyNode.Google({
-              clientId: process.env.GOOGLE_CLIENT_ID,
-              clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+              clientId: GOOGLE_CLIENT_ID,
+              clientSecret: GOOGLE_CLIENT_SECRET,
               scope: [
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/calendar.events.readonly',
@@ -44,11 +52,8 @@ export const getBackendConfig = (): TypeInput => {
                 )
 
                 if (response.status === 'OK') {
-                  const accessToken = response.authCodeResponse.access_token
                   const userId = response.user.id
-                  await UserMetadata.updateUserMetadata(userId, {
-                    googleAccessToken: accessToken,
-                  })
+                  postAuth(userId, response.authCodeResponse)
                 }
 
                 return response
