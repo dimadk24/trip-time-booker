@@ -1,10 +1,10 @@
-import { API_DOMAIN, FRONTEND_DOMAIN } from '../appConfig'
+import { APP_DOMAIN } from '../appConfig'
 
 export const appInfo = {
   // learn more about this on https://supertokens.com/docs/thirdpartyemailpassword/appinfo
   appName: 'Trip time booker',
-  apiDomain: API_DOMAIN,
-  websiteDomain: FRONTEND_DOMAIN,
+  apiDomain: APP_DOMAIN,
+  websiteDomain: APP_DOMAIN,
   apiBasePath: '/api/auth',
   websiteBasePath: '/auth',
 }

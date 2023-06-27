@@ -8,8 +8,7 @@ declare global {
       GOOGLE_CLIENT_SECRET: string
       SUPERTOKENS_CONNECTION_URI: string
       SUPERTOKENS_API_KEY: string
-      NEXT_PUBLIC_FRONTEND_DOMAIN: string
-      NEXT_PUBLIC_API_DOMAIN: string
+      NEXT_PUBLIC_DOMAIN: string
 
       GOOGLE_MAPS_API_KEY: string
     }
