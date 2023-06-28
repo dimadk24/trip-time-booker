@@ -1,4 +1,4 @@
-import { PUBLIC_APP_DOMAIN } from '../appConfig'
+import { PUBLIC_APP_DOMAIN } from '../app-config'
 
 export const appInfo = {
   // learn more about this on https://supertokens.com/docs/thirdpartyemailpassword/appinfo

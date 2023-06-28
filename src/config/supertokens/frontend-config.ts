@@ -2,7 +2,7 @@ import ThirdPartyReact from 'supertokens-auth-react/recipe/thirdparty'
 import SessionReact from 'supertokens-auth-react/recipe/session'
 import Router from 'next/router'
 import { type WindowHandlerInterface } from 'supertokens-web-js/utils/windowHandler/types'
-import { appInfo } from './appInfo'
+import { appInfo } from './app-info'
 
 export const frontendConfig = () => {
   return {

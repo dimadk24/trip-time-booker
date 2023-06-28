@@ -1,9 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
-import { getCredentials } from '@/src/services/userMeta'
-import { getJustCreatedEvents } from '@/src/services/googleCalendar'
-import { decrypt } from '@/src/utils/encryptionUtils'
+import { getCredentials } from '@/src/services/user-meta'
+import { getJustCreatedEvents } from '@/src/services/google-calendar'
+import { decrypt } from '@/src/utils/encryption-utils'
 
 export default async function calendarWebhook(
   req: NextApiRequest & Request,

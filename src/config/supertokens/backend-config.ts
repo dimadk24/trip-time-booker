@@ -8,9 +8,9 @@ import {
   GOOGLE_CLIENT_SECRET,
   SUPERTOKENS_API_KEY,
   SUPERTOKENS_CONNECTION_URI,
-} from '../appConfig'
-import { appInfo } from './appInfo'
-import { postAuth } from '@/src/postAuth'
+} from '../app-config'
+import { appInfo } from './app-info'
+import { postAuth } from '@/src/post-auth'
 
 export const getBackendConfig = (): TypeInput => {
   return {

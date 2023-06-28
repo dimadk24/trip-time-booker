@@ -4,8 +4,8 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import supertokens from 'supertokens-node'
 import NextCors from 'nextjs-cors'
-import { getBackendConfig } from '../../../src/config/supertokens/backendConfig'
-import { PUBLIC_APP_DOMAIN } from '@/src/config/appConfig'
+import { getBackendConfig } from '../../../src/config/supertokens/backend-config'
+import { PUBLIC_APP_DOMAIN } from '@/src/config/app-config'
 
 supertokens.init(getBackendConfig())
 
