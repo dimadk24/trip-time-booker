@@ -4,6 +4,7 @@ import {
   GOOGLE_CLIENT_SECRET,
   WEBHOOK_DOMAIN,
 } from '../config/appConfig'
+import { encrypt } from '../utils/encryptionUtils'
 
 export type Credentials = Parameters<
   InstanceType<(typeof google)['auth']['OAuth2']>['setCredentials']
@@ -35,7 +36,7 @@ export const registerWebhook = async (
     calendarId: 'primary',
     requestBody: {
       id: 'main',
-      token: userId,
+      token: encrypt(userId),
       type: 'webhook',
       address: `${WEBHOOK_DOMAIN}/api/calendar_webhook`,
     },
