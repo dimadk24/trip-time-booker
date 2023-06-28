@@ -44,9 +44,7 @@ export const registerWebhook = async (
   return { id, resourceId }
 }
 
-export const getJustCreatedEvents = async (
-  credentials: Credentials,
-) => {
+export const getJustCreatedEvents = async (credentials: Credentials) => {
   const calendar = await createClient(credentials)
 
   const fiveMinBefore = new Date()
