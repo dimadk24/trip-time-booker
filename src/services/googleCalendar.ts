@@ -25,18 +25,38 @@ const createClient = async (credentials: Credentials) => {
   return calendar
 }
 
-export const registerWebhook = async (credentials: Credentials) => {
+export const registerWebhook = async (
+  userId: string,
+  credentials: Credentials
+) => {
   const calendar = await createClient(credentials)
 
   const { data } = await calendar.events.watch({
     calendarId: 'primary',
     requestBody: {
       id: 'main',
-      token: 'webhook-secret-key',
+      token: userId,
       type: 'webhook',
       address: `${WEBHOOK_DOMAIN}/api/calendar_webhook`,
     },
   })
   const { id, resourceId } = data
   return { id, resourceId }
+}
+
+export const getJustCreatedEvents = async (
+  credentials: Credentials,
+) => {
+  const calendar = await createClient(credentials)
+
+  const fiveMinBefore = new Date()
+  fiveMinBefore.setMinutes(fiveMinBefore.getMinutes() - 5)
+
+  const response = await calendar.events.list({
+    calendarId: 'primary',
+    timeMin: new Date().toISOString(),
+    updatedMin: fiveMinBefore.toISOString(),
+    showDeleted: false,
+  })
+  return response.data.items || []
 }
