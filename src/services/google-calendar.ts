@@ -4,6 +4,9 @@ import {
   GOOGLE_CLIENT_SECRET,
   WEBHOOK_DOMAIN,
 } from '../config/app-config'
+import { createAppLogger } from '../utils/logger'
+
+const logger = createAppLogger('google-calendar')
 
 export type Credentials = Parameters<
   InstanceType<(typeof google)['auth']['OAuth2']>['setCredentials']
@@ -29,7 +32,11 @@ export const registerWebhook = async (
   userId: string,
   credentials: Credentials
 ) => {
+  logger.debug('Registering calendar webhook', { userId })
+
   const calendar = await createClient(credentials)
+
+  const webhookURL = `${WEBHOOK_DOMAIN}/api/calendar-webhook`
 
   const { data } = await calendar.events.watch({
     calendarId: 'primary',
@@ -37,24 +44,40 @@ export const registerWebhook = async (
       id: 'main',
       token: userId,
       type: 'webhook',
-      address: `${WEBHOOK_DOMAIN}/api/calendar_webhook`,
+      address: webhookURL,
     },
   })
   const { id, resourceId } = data
+
+  logger.debug('Calendar webhook registered', {
+    userId,
+    webhookResouceId: resourceId,
+    webhookURL,
+    webhookId: id,
+  })
   return { id, resourceId }
 }
 
-export const getJustCreatedEvents = async (credentials: Credentials) => {
+export const getJustChangedEvents = async (
+  credentials: Credentials,
+  userId: string
+) => {
   const calendar = await createClient(credentials)
 
   const fiveMinBefore = new Date()
   fiveMinBefore.setMinutes(fiveMinBefore.getMinutes() - 5)
 
-  const response = await calendar.events.list({
+  const params = {
     calendarId: 'primary',
     timeMin: new Date().toISOString(),
     updatedMin: fiveMinBefore.toISOString(),
     showDeleted: false,
-  })
-  return response.data.items || []
+  }
+
+  logger.debug('Getting recently changed events', { userId, ...params })
+  const response = await calendar.events.list(params)
+  const items = response.data.items || []
+  logger.info('Got recently changed events', { count: items.length, userId })
+
+  return items
 }

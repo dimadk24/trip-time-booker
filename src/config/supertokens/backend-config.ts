@@ -11,6 +11,9 @@ import {
 } from '../app-config'
 import { appInfo } from './app-info'
 import { postAuth } from '@/src/post-auth'
+import { createAppLogger } from '@/src/utils/logger'
+
+const logger = createAppLogger('backend-config')
 
 export const getBackendConfig = (): TypeInput => {
   return {
@@ -52,7 +55,15 @@ export const getBackendConfig = (): TypeInput => {
 
                 if (response.status === 'OK') {
                   const userId = response.user.id
+                  logger.debug(
+                    'signInUpPost successful on provider, processing post auth',
+                    { userId }
+                  )
                   postAuth(userId, response.authCodeResponse)
+                } else {
+                  logger.warn('signInUpPost not successful on provider', {
+                    response,
+                  })
                 }
 
                 return response

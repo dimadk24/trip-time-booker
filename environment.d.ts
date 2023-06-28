@@ -2,6 +2,7 @@ declare global {
   namespace NodeJS {
     interface ProcessEnv {
       PORT?: string
+      LOG_LEVEL: string
       NODE_ENV: 'development' | 'production' | 'test'
 
       GOOGLE_CLIENT_ID: string
