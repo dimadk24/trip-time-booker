@@ -1,6 +1,6 @@
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 
-import { Credentials, registerWebhook } from './services/googleCalendar'
+import { Credentials, registerWebhook } from './services/google-calendar'
 
 type AuthCodeResponse = {
   access_token: string

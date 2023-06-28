@@ -1,5 +1,5 @@
 import Cryptr from 'cryptr'
-import { SECRET_KEY } from '../config/appConfig'
+import { SECRET_KEY } from '../config/app-config'
 
 const cryptr = new Cryptr(SECRET_KEY)
 

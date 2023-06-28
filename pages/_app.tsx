@@ -3,7 +3,7 @@ import React from 'react'
 import { AppProps } from 'next/app'
 import SuperTokensReact, { SuperTokensWrapper } from 'supertokens-auth-react'
 
-import { frontendConfig } from '../src/config/supertokens/frontendConfig'
+import { frontendConfig } from '../src/config/supertokens/frontend-config'
 
 if (typeof window !== 'undefined') {
   SuperTokensReact.init(frontendConfig())

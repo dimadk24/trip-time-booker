@@ -3,8 +3,8 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   WEBHOOK_DOMAIN,
-} from '../config/appConfig'
-import { encrypt } from '../utils/encryptionUtils'
+} from '../config/app-config'
+import { encrypt } from '../utils/encryption-utils'
 
 export type Credentials = Parameters<
   InstanceType<(typeof google)['auth']['OAuth2']>['setCredentials']
