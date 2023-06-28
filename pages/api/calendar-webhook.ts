@@ -3,7 +3,6 @@ import { type Request, Response } from 'express'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import { getCredentials } from '@/src/services/user-meta'
 import { getJustCreatedEvents } from '@/src/services/google-calendar'
-import { decrypt } from '@/src/utils/encryption-utils'
 
 export default async function calendarWebhook(
   req: NextApiRequest & Request,
@@ -11,12 +10,10 @@ export default async function calendarWebhook(
 ) {
   const { headers } = req
 
-  let userId = headers['x-goog-channel-token']
+  const userId = headers['x-goog-channel-token']
 
   if (typeof userId !== 'string')
     return res.status(401).send('Invalid channel token')
-
-  userId = decrypt(userId)
 
   const user = await ThirdPartyNode.getUserById(userId)
   if (!user) {
