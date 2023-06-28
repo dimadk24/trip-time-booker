@@ -14,8 +14,6 @@ declare global {
       GOOGLE_CALENDAR_API_KEY: string
 
       DEV_LOCAL_WEBHOOK_DOMAIN?: string
-
-      SECRET_KEY: string
     }
   }
 }
