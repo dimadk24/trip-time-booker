@@ -10,6 +10,7 @@ export const {
   GOOGLE_CALENDAR_API_KEY,
   GOOGLE_MAPS_API_KEY,
   LOG_LEVEL,
+  HOME_LOCATION,
 } = process.env
 
 export const WEBHOOK_DOMAIN = (
