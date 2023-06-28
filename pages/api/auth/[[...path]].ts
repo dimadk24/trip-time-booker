@@ -5,7 +5,7 @@ import { type Request, Response } from 'express'
 import supertokens from 'supertokens-node'
 import NextCors from 'nextjs-cors'
 import { getBackendConfig } from '../../../src/config/supertokens/backendConfig'
-import { API_DOMAIN } from '@/src/config/appConfig'
+import { PUBLIC_APP_DOMAIN } from '@/src/config/appConfig'
 
 supertokens.init(getBackendConfig())
 
@@ -15,7 +15,7 @@ export default async function superTokens(
 ) {
   await NextCors(req, res, {
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    origin: [API_DOMAIN],
+    origin: [PUBLIC_APP_DOMAIN],
     credentials: true,
     allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
   })
