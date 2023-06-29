@@ -73,13 +73,11 @@ export class GoogleCalendarService {
       timeMin: new Date().toISOString(),
       updatedMin: fiveMinBefore.toISOString(),
       showDeleted: false,
-      orderBy: 'startTime',
     })
     const items = response.data.items || []
     logger.info('Got recently changed events', {
       count: items.length,
       userId: this.userId,
-      items,
     })
 
     return items
