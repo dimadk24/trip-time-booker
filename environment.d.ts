@@ -13,6 +13,7 @@ declare global {
 
       GOOGLE_MAPS_API_KEY: string
       GOOGLE_CALENDAR_API_KEY: string
+      GOOGLE_FIREBASE_KEY: string
 
       DEV_LOCAL_WEBHOOK_DOMAIN?: string
       HOME_LOCATION: string

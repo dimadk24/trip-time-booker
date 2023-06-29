@@ -8,16 +8,28 @@ import { getTripDuration } from '@/src/services/google-maps'
 import { HOME_LOCATION } from '@/src/config/app-config'
 import { createAppLogger } from '@/src/utils/logger'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
+import { firebaseAdmin } from '@/src/services/firebase'
+import { hash } from '@/src/utils/hasher'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
 const INVALID_RESOURCE_STATE = 'Invalid x-goog-resource-state header'
+
+type CalendarEvent = Awaited<
+  ReturnType<InstanceType<typeof GoogleCalendarService>['getJustChangedEvents']>
+>[number]
 
 const TRIP_EVENT_GAP = 5 * 60 // 5 min
 
 const logger = createAppLogger('calendar-webhook')
 
 supertokens.init(getBackendConfig())
+
+const firestore = firebaseAdmin.firestore
+
+const createFirestoreIdForEvent = (event: CalendarEvent) => {
+  return hash(`${event.id}-${event.start?.dateTime}-${event.location}`)
+}
 
 export default async function calendarWebhook(
   req: NextApiRequest & Request,
@@ -68,16 +80,36 @@ export default async function calendarWebhook(
 
   const justCreatedEvents = await calendarService.getJustChangedEvents()
 
+  const db = firestore()
+
   const promises = justCreatedEvents.map(async (event) => {
     const eventId = event.id
     if (!event.location) {
-      logger.debug('No location for event', { eventId, userId })
+      logger.debug('No location for event, skipping', { eventId, userId })
       return
     }
     if (!event.start?.dateTime) {
-      logger.warn('No start datetime for event', { eventId, userId })
+      logger.warn('No start datetime for event, skipping', { eventId, userId })
       return
     }
+    const firestoreDocId = createFirestoreIdForEvent(event)
+    const eventRef = db.collection('processed-events').doc(firestoreDocId)
+    const doc = await eventRef.get()
+
+    if (doc.exists) {
+      logger.debug('Firestore doc already exists for event, skipping', {
+        userId,
+        eventId,
+        firestoreDocId,
+      })
+      return
+    }
+
+    logger.debug('No doc for event found in firestore, processing event', {
+      userId,
+      eventId,
+      firestoreDocId,
+    })
 
     const arrivalTimestamp =
       Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
@@ -96,6 +128,15 @@ export default async function calendarWebhook(
     const possiblePlaceName = event.location.split(',')[0]
 
     await calendarService.createTripEvent(startDate, endDate, possiblePlaceName)
+
+    await eventRef.set({
+      processed: true,
+    })
+    logger.debug('Created firestore doc for the processed event', {
+      userId,
+      eventId,
+      firestoreDocId,
+    })
   })
 
   await Promise.all(promises)
