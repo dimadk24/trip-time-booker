@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import { getCredentials } from '@/src/services/user-meta'
-import { getJustChangedEvents } from '@/src/services/google-calendar'
+import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
 import { HOME_LOCATION } from '@/src/config/app-config'
 import { createAppLogger } from '@/src/utils/logger'
@@ -60,7 +60,9 @@ export default async function calendarWebhook(
 
   const credentials = await getCredentials(userId)
 
-  const justCreatedEvents = await getJustChangedEvents(credentials, userId)
+  const calendarService = new GoogleCalendarService(credentials)
+
+  const justCreatedEvents = await calendarService.getJustChangedEvents(userId)
 
   const promises = justCreatedEvents.map(async (event) => {
     const eventId = event.id
