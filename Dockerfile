@@ -2,7 +2,7 @@ FROM node:18.16.0-bullseye-slim
 
 ENV HUSKY=0
 
-RUN corepack enable && corepack prepare pnpm@8.6.2 --activate
+RUN corepack enable && corepack prepare pnpm@8.6.5 --activate
 
 WORKDIR /app
 
