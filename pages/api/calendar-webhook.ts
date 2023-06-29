@@ -1,11 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
+import supertokens from 'supertokens-node'
 import { getCredentials } from '@/src/services/user-meta'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
 import { HOME_LOCATION } from '@/src/config/app-config'
 import { createAppLogger } from '@/src/utils/logger'
+import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
@@ -14,6 +16,8 @@ const INVALID_RESOURCE_STATE = 'Invalid x-goog-resource-state header'
 const TRIP_EVENT_GAP = 5 * 60 // 5 min
 
 const logger = createAppLogger('calendar-webhook')
+
+supertokens.init(getBackendConfig())
 
 export default async function calendarWebhook(
   req: NextApiRequest & Request,
@@ -60,9 +64,9 @@ export default async function calendarWebhook(
 
   const credentials = await getCredentials(userId)
 
-  const calendarService = new GoogleCalendarService(credentials)
+  const calendarService = new GoogleCalendarService(credentials, userId)
 
-  const justCreatedEvents = await calendarService.getJustChangedEvents(userId)
+  const justCreatedEvents = await calendarService.getJustChangedEvents()
 
   const promises = justCreatedEvents.map(async (event) => {
     const eventId = event.id
@@ -84,9 +88,14 @@ export default async function calendarWebhook(
       arrivalTimestamp,
       userId
     )
-    console.log(duration)
 
-    // create events
+    const startTimestamp = arrivalTimestamp - duration
+    const startDate = new Date(startTimestamp * 1000)
+    const endDate = new Date(arrivalTimestamp * 1000)
+
+    const possiblePlaceName = event.location.split(',')[0]
+
+    await calendarService.createTripEvent(startDate, endDate, possiblePlaceName)
   })
 
   await Promise.all(promises)
