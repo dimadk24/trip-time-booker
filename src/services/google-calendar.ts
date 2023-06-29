@@ -17,7 +17,9 @@ type CalendarClient = ReturnType<(typeof google)['calendar']>
 export class GoogleCalendarService {
   client: CalendarClient
 
-  constructor(credentials: Credentials) {
+  userId: string
+
+  constructor(credentials: Credentials, userId: string) {
     const oauth2Client = new google.auth.OAuth2({
       clientId: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
@@ -30,10 +32,12 @@ export class GoogleCalendarService {
       version: 'v3',
       auth: oauth2Client,
     })
+
+    this.userId = userId
   }
 
-  async registerWebhook(userId: string) {
-    logger.debug('Registering calendar webhook', { userId })
+  async registerWebhook() {
+    logger.debug('Registering calendar webhook', { userId: this.userId })
 
     const webhookURL = `${WEBHOOK_DOMAIN}/api/calendar-webhook`
 
@@ -41,7 +45,7 @@ export class GoogleCalendarService {
       calendarId: 'primary',
       requestBody: {
         id: 'main',
-        token: userId,
+        token: this.userId,
         type: 'webhook',
         address: webhookURL,
       },
@@ -49,7 +53,7 @@ export class GoogleCalendarService {
     const { id, resourceId } = data
 
     logger.debug('Calendar webhook registered', {
-      userId,
+      userId: this.userId,
       webhookResouceId: resourceId,
       webhookURL,
       webhookId: id,
@@ -57,22 +61,54 @@ export class GoogleCalendarService {
     return { id, resourceId }
   }
 
-  async getJustChangedEvents(userId: string) {
+  async getJustChangedEvents() {
     const fiveMinBefore = new Date()
     fiveMinBefore.setMinutes(fiveMinBefore.getMinutes() - 5)
 
-    const params = {
+    logger.debug('Getting recently changed events', {
+      userId: this.userId,
+    })
+    const response = await this.client.events.list({
       calendarId: 'primary',
       timeMin: new Date().toISOString(),
       updatedMin: fiveMinBefore.toISOString(),
       showDeleted: false,
-    }
-
-    logger.debug('Getting recently changed events', { userId, ...params })
-    const response = await this.client.events.list(params)
+      orderBy: 'startTime',
+    })
     const items = response.data.items || []
-    logger.info('Got recently changed events', { count: items.length, userId })
+    logger.info('Got recently changed events', {
+      count: items.length,
+      userId: this.userId,
+      items,
+    })
 
     return items
+  }
+
+  async createTripEvent(start: Date, end: Date, placeName: string) {
+    const params = {
+      start: {
+        dateTime: start.toISOString(),
+      },
+      end: {
+        dateTime: end.toISOString(),
+      },
+      summary: `Trip to the ${placeName}`,
+      description: '\n---\nCreated by Trip Time Booker',
+      reminders: {
+        useDefault: true,
+      },
+    }
+
+    logger.debug('Creating trip event', { userId: this.userId })
+
+    await this.client.events.insert({
+      calendarId: 'primary',
+      requestBody: params,
+    })
+
+    logger.info('Successfully created trip event', {
+      userId: this.userId,
+    })
   }
 }

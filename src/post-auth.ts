@@ -32,9 +32,9 @@ export async function postAuth(
     googleOAuthRefreshToken: credentials.refresh_token,
   })
 
-  const calendarClient = new GoogleCalendarService(credentials)
+  const calendarClient = new GoogleCalendarService(credentials, userId)
 
-  const { id, resourceId } = await calendarClient.registerWebhook(userId)
+  const { id, resourceId } = await calendarClient.registerWebhook()
 
   await UserMetadata.updateUserMetadata(userId, {
     calendarWebhookId: id,
