@@ -3,9 +3,7 @@ import { middleware } from 'supertokens-node/framework/express'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import supertokens from 'supertokens-node'
-import NextCors from 'nextjs-cors'
 import { getBackendConfig } from '../../../src/config/supertokens/backend-config'
-import { PUBLIC_APP_DOMAIN } from '@/src/config/app-config'
 
 supertokens.init(getBackendConfig())
 
@@ -13,13 +11,6 @@ export default async function superTokens(
   req: NextApiRequest & Request,
   res: NextApiResponse & Response
 ) {
-  await NextCors(req, res, {
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    origin: [PUBLIC_APP_DOMAIN],
-    credentials: true,
-    allowedHeaders: ['content-type', ...supertokens.getAllCORSHeaders()],
-  })
-
   await superTokensNextWrapper(
     async (next) => {
       res.setHeader(
