@@ -1,7 +1,10 @@
 import admin from 'firebase-admin'
 import { GOOGLE_FIREBASE_KEY } from '../config/app-config'
+import { createAppLogger } from '../utils/logger'
 
 const firebaseConfig = GOOGLE_FIREBASE_KEY
+
+const logger = createAppLogger('firebase')
 
 try {
   admin.initializeApp({
@@ -16,7 +19,7 @@ try {
   // @ts-ignore
   if (!/already exists/u.test(error?.message)) {
     // @ts-ignore
-    console.error('Firebase admin initialization error', error?.stack)
+    logger.error('Firebase admin initialization error', error?.stack)
   }
 }
 
