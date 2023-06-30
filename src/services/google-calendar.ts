@@ -14,6 +14,8 @@ export type Credentials = Parameters<
 
 type CalendarClient = ReturnType<(typeof google)['calendar']>
 
+const FAILED_TO_UNREGISTER_WEBHOOK = `Failed to unregister calendar webhook`
+
 export class GoogleCalendarService {
   client: CalendarClient
 
@@ -52,10 +54,42 @@ export class GoogleCalendarService {
     })
     const { id, resourceId } = data
 
-    logger.debug('Calendar webhook registered', {
+    logger.info('Calendar webhook registered', {
       userId: this.userId,
       webhookResouceId: resourceId,
       webhookURL,
+      webhookId: id,
+    })
+    return { id, resourceId }
+  }
+
+  async unregisterWebhook(id: string, resourceId: string) {
+    logger.debug('Unregistering calendar webhook', {
+      userId: this.userId,
+    })
+
+    const { status, data } = await this.client.channels.stop({
+      requestBody: {
+        id,
+        resourceId,
+      },
+    })
+    if (status !== 204) {
+      logger.error(FAILED_TO_UNREGISTER_WEBHOOK, {
+        userId: this.userId,
+        webhookResourceId: resourceId,
+        webhookId: id,
+        calendarApi: {
+          statusCode: status,
+          data,
+        },
+      })
+      throw new Error(FAILED_TO_UNREGISTER_WEBHOOK)
+    }
+
+    logger.info('Successfully unregistered calendar webhook', {
+      userId: this.userId,
+      webhookResouceId: resourceId,
       webhookId: id,
     })
     return { id, resourceId }
