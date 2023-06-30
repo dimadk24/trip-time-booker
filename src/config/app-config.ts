@@ -1,4 +1,5 @@
 export const PUBLIC_APP_DOMAIN = process.env.NEXT_PUBLIC_DOMAIN
+export const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
 
 export const {
   SUPERTOKENS_CONNECTION_URI,
