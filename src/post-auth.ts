@@ -1,6 +1,6 @@
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 
-import { Credentials, GoogleCalendarService } from './services/google-calendar'
+import { Credentials } from './services/google-calendar'
 
 type AuthCodeResponse = {
   access_token: string
@@ -30,14 +30,5 @@ export async function postAuth(
 
   await UserMetadata.updateUserMetadata(userId, {
     googleOAuthRefreshToken: credentials.refresh_token,
-  })
-
-  const calendarClient = new GoogleCalendarService(credentials, userId)
-
-  const { id, resourceId } = await calendarClient.registerWebhook()
-
-  await UserMetadata.updateUserMetadata(userId, {
-    calendarWebhookId: id,
-    calendarWebhookResourceId: resourceId,
   })
 }

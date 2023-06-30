@@ -6,3 +6,16 @@ export const getCredentials = async (
   const { metadata } = await UserMetadata.getUserMetadata(userId)
   return { refresh_token: metadata.googleOAuthRefreshToken }
 }
+
+export const getCalendarWebhookData = async (
+  userId: string
+): Promise<{
+  calendarWebhookId: string | null
+  calendarWebhookResourceId: string | null
+}> => {
+  const { metadata } = await UserMetadata.getUserMetadata(userId)
+  return {
+    calendarWebhookId: metadata.calendarWebhookId,
+    calendarWebhookResourceId: metadata.calendarWebhookResourceId,
+  }
+}
