@@ -8,6 +8,12 @@ dependencies:
   '@googlemaps/google-maps-services-js':
     specifier: 3.3.32
     version: 3.3.32
+  '@logtail/node':
+    specifier: 0.4.0
+    version: 0.4.0
+  '@logtail/winston':
+    specifier: 0.4.1
+    version: 0.4.1(winston@3.9.0)
   '@types/express':
     specifier: 4.17.17
     version: 4.17.17
@@ -428,6 +434,57 @@ packages:
     dev: false
     optional: true
 
+  /@logtail/core@0.4.0:
+    resolution: {integrity: sha512-xItEU5vY2LvcJyAVkxKKZ3UvG3CsK2pMvhuLDntlC+US1LlNcfQmVzvInN5j5iXl0kjNO6n+0EY2YyhhOgjWCQ==}
+    dependencies:
+      '@logtail/tools': 0.4.0
+      '@logtail/types': 0.4.0
+    dev: false
+
+  /@logtail/node@0.4.0:
+    resolution: {integrity: sha512-0/1to4HLf95FrDlZoFLz3A0Fz/B55G82syY22Yl9N4mjC2wW6t5Lo9d4q/u/VmHBHW3PBbytbmFEoHx0H5Sarg==}
+    dependencies:
+      '@logtail/core': 0.4.0
+      '@logtail/types': 0.4.0
+      '@msgpack/msgpack': 2.8.0
+      '@types/stack-trace': 0.0.29
+      cross-fetch: 3.1.6
+      minimatch: 3.1.2
+      stack-trace: 0.0.10
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@logtail/tools@0.4.0:
+    resolution: {integrity: sha512-7lSKdJTq7NMUvriMhkf6cTxY9QlXi+YLLuHxbSOKI56HpJN8qJGPVcmOdzlbk8pJofe9RnME8hBMLTHAD3bmsw==}
+    dependencies:
+      '@logtail/types': 0.4.0
+    dev: false
+
+  /@logtail/types@0.4.0:
+    resolution: {integrity: sha512-2CR3w7Xf5rKWbUlgiaBKeVrqWuWnVBz0Ymycw/gYwupVI0fb6Ameid9fHfeM5LI/gbIO3ZTIMADlA0FvFbuXMQ==}
+    dependencies:
+      js: 0.1.0
+    dev: false
+
+  /@logtail/winston@0.4.1(winston@3.9.0):
+    resolution: {integrity: sha512-YsMXzhcpGHDd3ijyqnDD+2qraJAiar/mVjR7HP8NYQsQMk9dQTIHbQzXkBUwAfVOsKSzNbfzeWTnft8sQBYxYQ==}
+    peerDependencies:
+      winston: '>=3.2.1'
+    dependencies:
+      '@logtail/node': 0.4.0
+      '@logtail/types': 0.4.0
+      winston: 3.9.0
+      winston-transport: 4.5.0
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@msgpack/msgpack@2.8.0:
+    resolution: {integrity: sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==}
+    engines: {node: '>= 10'}
+    dev: false
+
   /@next/env@13.4.7:
     resolution: {integrity: sha512-ZlbiFulnwiFsW9UV1ku1OvX/oyIPLtMk9p/nnvDSwI0s7vSoZdRtxXNsaO+ZXrLv/pMbXVGq4lL8TbY9iuGmVw==}
     dev: false
@@ -779,6 +836,10 @@ packages:
       '@types/http-errors': 2.0.1
       '@types/mime': 3.0.1
       '@types/node': 20.3.2
+    dev: false
+
+  /@types/stack-trace@0.0.29:
+    resolution: {integrity: sha512-TgfOX+mGY/NyNxJLIbDWrO9DjGoVSW9+aB8H2yy1fy32jsvxijhmyJI9fDFgvz3YP4lvJaq9DzdR/M1bOgVc9g==}
     dev: false
 
   /@types/triple-beam@1.3.2:
@@ -1412,6 +1473,13 @@ packages:
       delayed-stream: 1.0.0
     dev: false
 
+  /commander@1.1.1:
+    resolution: {integrity: sha512-71Rod2AhcH3JhkBikVpNd0pA+fWsmAaVoti6OR38T76chA7vE3pSerS0Jor4wDw+tOueD2zLVvFOw5H0Rcj7rA==}
+    engines: {node: '>= 0.6.x'}
+    dependencies:
+      keypress: 0.1.0
+    dev: false
+
   /commander@10.0.1:
     resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
     engines: {node: '>=14'}
@@ -1453,6 +1521,14 @@ packages:
     dependencies:
       object-assign: 4.1.1
       vary: 1.1.2
+    dev: false
+
+  /cross-fetch@3.1.6:
+    resolution: {integrity: sha512-riRvo06crlE8HiqOwIpQhxwdOk4fOeR7FVM/wXoxchFEqMNUjvbs3bfo4OTgMEMHzppd4DxFBDbyySj8Cv781g==}
+    dependencies:
+      node-fetch: 2.6.11
+    transitivePeerDependencies:
+      - encoding
     dev: false
 
   /cross-spawn@7.0.3:
@@ -2887,6 +2963,13 @@ packages:
     dev: false
     optional: true
 
+  /js@0.1.0:
+    resolution: {integrity: sha512-ZBbGYOpact8QAH9RprFWL4RAESYwbDodxiuDjOnzwzzk9pBzKycoifGuUrHHcDixE/eLMKPHRaXenTgu1qXBqA==}
+    hasBin: true
+    dependencies:
+      commander: 1.1.1
+    dev: false
+
   /jsdoc@4.0.2:
     resolution: {integrity: sha512-e8cIg2z62InH7azBBi3EsSEqrKx+nUtAS5bBcYTSpZFA+vhNPyhv8PTFZ0WsjOPDj04/dOLlm08EDcQJDqaGQg==}
     engines: {node: '>=12.0.0'}
@@ -3001,6 +3084,10 @@ packages:
     dependencies:
       jwa: 2.0.0
       safe-buffer: 5.2.1
+    dev: false
+
+  /keypress@0.1.0:
+    resolution: {integrity: sha512-x0yf9PL/nx9Nw9oLL8ZVErFAk85/lslwEP7Vz7s5SI1ODXZIgit3C5qyWjw4DxOuO/3Hb4866SQh28a1V1d+WA==}
     dev: false
 
   /klaw@3.0.0:
