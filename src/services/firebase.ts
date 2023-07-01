@@ -1,8 +1,8 @@
 import admin from 'firebase-admin'
-import { GOOGLE_FIREBASE_KEY } from '../config/app-config'
+import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
 
-const firebaseConfig = GOOGLE_FIREBASE_KEY
+const firebaseConfig = backendEnv.GOOGLE_FIREBASE_KEY
 
 const logger = createAppLogger('firebase')
 

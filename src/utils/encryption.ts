@@ -1,16 +1,16 @@
 import crypto from 'crypto'
-import { SECRET_INIT_VECTOR, SECRET_KEY } from '../config/app-config'
+import { backendEnv } from '../config/backend-env'
 
 const encryptionMethod = 'aes-256-cbc'
 
 const key = crypto
   .createHash('sha512')
-  .update(SECRET_KEY)
+  .update(backendEnv.SECRET_KEY)
   .digest('hex')
   .substring(0, 32)
 const encryptionInitVector = crypto
   .createHash('sha512')
-  .update(SECRET_INIT_VECTOR)
+  .update(backendEnv.SECRET_INIT_VECTOR)
   .digest('hex')
   .substring(0, 16)
 

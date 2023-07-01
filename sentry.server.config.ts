@@ -3,15 +3,15 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs'
-import { SERVER_SENTRY_DEBUG, SENTRY_DSN } from './src/config/app-config'
+import { backendEnv } from './src/config/backend-env'
 
-if (SENTRY_DSN)
+if (backendEnv.NEXT_PUBLIC_SENTRY_DSN)
   Sentry.init({
-    dsn: SENTRY_DSN,
+    dsn: backendEnv.NEXT_PUBLIC_SENTRY_DSN,
 
     // Adjust this value in production, or use tracesSampler for greater control
     tracesSampleRate: 0.2,
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
-    debug: SERVER_SENTRY_DEBUG === '1' ? true : false,
+    debug: backendEnv.SERVER_SENTRY_DEBUG,
   })
