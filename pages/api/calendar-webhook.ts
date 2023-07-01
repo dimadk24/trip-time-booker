@@ -10,6 +10,7 @@ import { createAppLogger } from '@/src/utils/logger'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import { firebaseAdmin } from '@/src/services/firebase'
 import { hash } from '@/src/utils/hasher'
+import { decryptData } from '@/src/utils/encryption'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
@@ -38,13 +39,15 @@ export default async function calendarWebhook(
   logger.debug('Calendar webhook called')
   const { headers } = req
 
-  const userId = headers['x-goog-channel-token']
+  const channelToken = headers['x-goog-channel-token']
+  console.log(channelToken)
 
-  if (typeof userId !== 'string') {
-    logger.warn(INVALID_CHANNEL_TOKEN, { token: userId })
+  if (typeof channelToken !== 'string') {
+    logger.warn(INVALID_CHANNEL_TOKEN, { token: channelToken })
     return res.status(401).send(INVALID_CHANNEL_TOKEN)
   }
 
+  const userId = decryptData(channelToken)
   const user = await ThirdPartyNode.getUserById(userId)
   if (!user) {
     logger.warn('No user can be found by channel token', { token: userId })

@@ -4,6 +4,8 @@ declare global {
       PORT?: string
       LOG_LEVEL: string
       NODE_ENV: 'development' | 'production' | 'test'
+      SECRET_KEY: string
+      SECRET_INIT_VECTOR: string
 
       GOOGLE_CLIENT_ID: string
       GOOGLE_CLIENT_SECRET: string

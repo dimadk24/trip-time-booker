@@ -5,6 +5,7 @@ import {
   WEBHOOK_DOMAIN,
 } from '../config/app-config'
 import { createAppLogger } from '../utils/logger'
+import { encryptData } from '../utils/encryption'
 
 const logger = createAppLogger('google-calendar')
 
@@ -47,7 +48,7 @@ export class GoogleCalendarService {
       calendarId: 'primary',
       requestBody: {
         id: 'main',
-        token: this.userId,
+        token: encryptData(this.userId),
         type: 'webhook',
         address: webhookURL,
       },
