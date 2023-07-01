@@ -3,7 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs'
-import { SENTRY_DSN } from './src/config/app-config'
+import { SERVER_SENTRY_DEBUG, SENTRY_DSN } from './src/config/app-config'
 
 if (SENTRY_DSN)
   Sentry.init({
@@ -13,5 +13,5 @@ if (SENTRY_DSN)
     tracesSampleRate: 0.2,
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
-    debug: false,
+    debug: SERVER_SENTRY_DEBUG === '1' ? true : false,
   })

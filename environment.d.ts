@@ -13,6 +13,7 @@ declare global {
       SUPERTOKENS_API_KEY: string
       NEXT_PUBLIC_DOMAIN: string
       NEXT_PUBLIC_SENTRY_DSN: string
+      SERVER_SENTRY_DEBUG: '1' | '0' | ''
 
       GOOGLE_MAPS_API_KEY: string
       GOOGLE_CALENDAR_API_KEY: string

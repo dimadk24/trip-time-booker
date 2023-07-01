@@ -17,6 +17,7 @@ export const {
   HOME_LOCATION,
   SECRET_KEY,
   SECRET_INIT_VECTOR,
+  SERVER_SENTRY_DEBUG,
 } = process.env
 
 export const WEBHOOK_DOMAIN = (
