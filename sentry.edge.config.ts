@@ -3,11 +3,11 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs'
-import { SENTRY_DSN } from './src/config/app-config'
+import { backendEnv } from './src/config/backend-env'
 
-if (SENTRY_DSN)
+if (backendEnv.NEXT_PUBLIC_SENTRY_DSN)
   Sentry.init({
-    dsn: SENTRY_DSN,
+    dsn: backendEnv.NEXT_PUBLIC_SENTRY_DSN,
 
     // Adjust this value in production, or use tracesSampler for greater control
     tracesSampleRate: 0.2,

@@ -3,12 +3,7 @@ import SessionNode from 'supertokens-node/recipe/session'
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import Dashboard from 'supertokens-node/recipe/dashboard'
 import { TypeInput } from 'supertokens-node/types'
-import {
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  SUPERTOKENS_API_KEY,
-  SUPERTOKENS_CONNECTION_URI,
-} from '../app-config'
+import { backendEnv } from '../backend-env'
 import { appInfo } from './app-info'
 import { postAuth } from '@/src/post-auth'
 import { createAppLogger } from '@/src/utils/logger'
@@ -19,8 +14,8 @@ export const getBackendConfig = (): TypeInput => {
   return {
     framework: 'express',
     supertokens: {
-      connectionURI: SUPERTOKENS_CONNECTION_URI,
-      apiKey: SUPERTOKENS_API_KEY,
+      connectionURI: backendEnv.SUPERTOKENS_CONNECTION_URI,
+      apiKey: backendEnv.SUPERTOKENS_API_KEY,
     },
     appInfo,
     recipeList: [
@@ -28,8 +23,8 @@ export const getBackendConfig = (): TypeInput => {
         signInAndUpFeature: {
           providers: [
             ThirdPartyNode.Google({
-              clientId: GOOGLE_CLIENT_ID,
-              clientSecret: GOOGLE_CLIENT_SECRET,
+              clientId: backendEnv.GOOGLE_CLIENT_ID,
+              clientSecret: backendEnv.GOOGLE_CLIENT_SECRET,
               scope: [
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/calendar.events',

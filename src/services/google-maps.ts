@@ -4,7 +4,7 @@ import {
   TravelMode,
   UnitSystem,
 } from '@googlemaps/google-maps-services-js'
-import { GOOGLE_MAPS_API_KEY } from '../config/app-config'
+import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
 
 const logger = createAppLogger('google-maps')
@@ -30,7 +30,7 @@ export const getTripDuration = async (
       ...eventData,
       mode: TravelMode.transit,
       units: UnitSystem.metric,
-      key: GOOGLE_MAPS_API_KEY,
+      key: backendEnv.GOOGLE_MAPS_API_KEY,
     },
     timeout: 1000,
   })

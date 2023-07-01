@@ -1,11 +1,12 @@
 import { google } from 'googleapis'
-import {
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  WEBHOOK_DOMAIN,
-} from '../config/app-config'
+import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
 import { encryptData } from '../utils/encryption'
+
+const WEBHOOK_DOMAIN =
+  backendEnv.NODE_ENV === 'development'
+    ? backendEnv.DEV_LOCAL_WEBHOOK_DOMAIN
+    : backendEnv.NEXT_PUBLIC_APP_DOMAIN
 
 const logger = createAppLogger('google-calendar')
 
@@ -24,8 +25,8 @@ export class GoogleCalendarService {
 
   constructor(credentials: Credentials, userId: string) {
     const oauth2Client = new google.auth.OAuth2({
-      clientId: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
+      clientId: backendEnv.GOOGLE_CLIENT_ID,
+      clientSecret: backendEnv.GOOGLE_CLIENT_SECRET,
       redirectUri: '',
     })
 

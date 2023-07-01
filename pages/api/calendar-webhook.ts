@@ -5,7 +5,7 @@ import supertokens from 'supertokens-node'
 import { getCredentials } from '@/src/services/user-meta'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
-import { HOME_LOCATION } from '@/src/config/app-config'
+import { backendEnv } from '@/src/config/backend-env'
 import { createAppLogger } from '@/src/utils/logger'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import { firebaseAdmin } from '@/src/services/firebase'
@@ -118,7 +118,7 @@ export default async function calendarWebhook(
       Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
 
     const duration = await getTripDuration(
-      HOME_LOCATION,
+      backendEnv.HOME_LOCATION,
       event.location,
       arrivalTimestamp,
       userId
