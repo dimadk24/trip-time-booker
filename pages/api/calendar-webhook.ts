@@ -100,7 +100,7 @@ export default async function calendarWebhook(
     const doc = await eventRef.get()
 
     if (doc.exists) {
-      logger.debug('Firestore doc already exists for event, skipping', {
+      logger.info('Firestore doc already exists for event, skipping', {
         userId,
         eventId,
         firestoreDocId,
