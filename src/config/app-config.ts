@@ -15,6 +15,8 @@ export const {
 
   LOG_LEVEL,
   HOME_LOCATION,
+  SECRET_KEY,
+  SECRET_INIT_VECTOR,
 } = process.env
 
 export const WEBHOOK_DOMAIN = (
