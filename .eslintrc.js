@@ -78,6 +78,8 @@ module.exports = {
 
     // typescript
     '@typescript-eslint/ban-ts-comment': 'off',
+
+    'no-console': 'warn',
   },
   root: true,
 }
