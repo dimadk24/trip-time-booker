@@ -1,4 +1,4 @@
-import { bool, cleanEnv, json, port, str, url } from 'envalid'
+import { cleanEnv, json, port, str, url } from 'envalid'
 
 export const backendEnv = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ['development', 'test', 'production'] }),
@@ -19,7 +19,6 @@ export const backendEnv = cleanEnv(process.env, {
   HOME_LOCATION: str(),
   SECRET_KEY: str(),
   SECRET_INIT_VECTOR: str(),
-  SERVER_SENTRY_DEBUG: bool({ default: false }),
 
   DEV_LOCAL_WEBHOOK_DOMAIN: url({ default: '' }),
 

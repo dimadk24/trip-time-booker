@@ -3,15 +3,17 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs'
-import { backendEnv } from './src/config/backend-env'
+import { frontendEnv } from './src/config/frontend-env'
+// during build nextjs imports this file in frontend
+// therefore need to use frontend env, not backend
 
-if (backendEnv.NEXT_PUBLIC_SENTRY_DSN)
+if (frontendEnv.NEXT_PUBLIC_SENTRY_DSN)
   Sentry.init({
-    dsn: backendEnv.NEXT_PUBLIC_SENTRY_DSN,
+    dsn: frontendEnv.NEXT_PUBLIC_SENTRY_DSN,
 
     // Adjust this value in production, or use tracesSampler for greater control
     tracesSampleRate: 0.2,
 
     // Setting this option to true will print useful information to the console while you're setting up Sentry.
-    debug: backendEnv.SERVER_SENTRY_DEBUG,
+    debug: frontendEnv.NEXT_PUBLIC_SERVER_SENTRY_DEBUG,
   })
