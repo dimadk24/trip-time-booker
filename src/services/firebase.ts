@@ -9,7 +9,7 @@ const logger = createAppLogger('firebase')
 try {
   admin.initializeApp({
     // @ts-ignore
-    credential: admin.credential.cert(JSON.parse(firebaseConfig)),
+    credential: admin.credential.cert(firebaseConfig),
   })
 } catch (error) {
   /*

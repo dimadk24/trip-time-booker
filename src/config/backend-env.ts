@@ -18,7 +18,7 @@ export const backendEnv = cleanEnv(process.env, {
   SUPERTOKENS_API_KEY: str(),
   GOOGLE_CLIENT_ID: str(),
   GOOGLE_CLIENT_SECRET: str(),
-  GOOGLE_FIREBASE_KEY: json(),
+  GOOGLE_FIREBASE_KEY: json<Record<string, unknown>>(),
   GOOGLE_CALENDAR_API_KEY: str(),
   GOOGLE_MAPS_API_KEY: str(),
   LOGTAIL_TOKEN: str(),
