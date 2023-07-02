@@ -21,7 +21,7 @@ export const backendEnv = cleanEnv(process.env, {
   GOOGLE_FIREBASE_KEY: json<Record<string, unknown>>(),
   GOOGLE_CALENDAR_API_KEY: str(),
   GOOGLE_MAPS_API_KEY: str(),
-  LOGTAIL_TOKEN: str(),
+  LOGTAIL_TOKEN: str({ devDefault: '' }),
   LOG_LEVEL: str({
     choices: Object.keys(winston.config.npm.levels) as LogLevel[],
     default: 'info',
@@ -31,7 +31,4 @@ export const backendEnv = cleanEnv(process.env, {
   SECRET_INIT_VECTOR: str(),
 
   DEV_LOCAL_WEBHOOK_DOMAIN: url({ default: '' }),
-
-  NEXT_PUBLIC_APP_DOMAIN: url({ devDefault: 'http://localhost:3000' }),
-  NEXT_PUBLIC_SENTRY_DSN: url(),
 })

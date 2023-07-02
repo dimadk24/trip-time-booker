@@ -8,9 +8,9 @@ const env = {
 }
 
 export const frontendEnv = cleanEnv(env, {
-  NODE_ENV: str({ choices: ['development', 'test', 'production'] }),
+  NODE_ENV: str({ choices: ['development', 'test', 'production'] as const }),
 
   NEXT_PUBLIC_APP_DOMAIN: url({ devDefault: 'http://localhost:3000' }),
-  NEXT_PUBLIC_SENTRY_DSN: url(),
+  NEXT_PUBLIC_SENTRY_DSN: url({ devDefault: '' }),
   NEXT_PUBLIC_SERVER_SENTRY_DEBUG: bool({ default: false }),
 })

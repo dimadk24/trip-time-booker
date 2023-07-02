@@ -18,7 +18,7 @@ rootLogger.add(
   })
 )
 
-if (backendEnv.NODE_ENV === 'production' && backendEnv.LOGTAIL_TOKEN) {
+if (backendEnv.LOGTAIL_TOKEN) {
   const logtail = new Logtail(backendEnv.LOGTAIL_TOKEN)
   rootLogger.add(new LogtailTransport(logtail))
 }
