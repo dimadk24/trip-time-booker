@@ -32,6 +32,11 @@ const createFirestoreIdForEvent = (event: CalendarEvent) => {
   return hash(`${event.id}-${event.start?.dateTime}-${event.location}`)
 }
 
+const PROCESSED_EVENTS_COLLECTION =
+  backendEnv.NODE_ENV === 'production'
+    ? 'processed-events'
+    : 'dev-processed-events'
+
 export default async function calendarWebhook(
   req: NextApiRequest & Request,
   res: NextApiResponse & Response
@@ -95,7 +100,9 @@ export default async function calendarWebhook(
       return
     }
     const firestoreDocId = createFirestoreIdForEvent(event)
-    const eventRef = db.collection('processed-events').doc(firestoreDocId)
+    const eventRef = db
+      .collection(PROCESSED_EVENTS_COLLECTION)
+      .doc(firestoreDocId)
     const doc = await eventRef.get()
 
     if (doc.exists) {
