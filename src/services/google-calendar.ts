@@ -2,11 +2,12 @@ import { google } from 'googleapis'
 import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
 import { encryptData } from '../utils/encryption'
+import { frontendEnv } from '../config/frontend-env'
 
 const WEBHOOK_DOMAIN =
   backendEnv.NODE_ENV === 'development'
     ? backendEnv.DEV_LOCAL_WEBHOOK_DOMAIN
-    : backendEnv.NEXT_PUBLIC_APP_DOMAIN
+    : frontendEnv.NEXT_PUBLIC_APP_DOMAIN
 
 const logger = createAppLogger('google-calendar')
 
