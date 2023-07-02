@@ -40,7 +40,6 @@ export default async function calendarWebhook(
   const { headers } = req
 
   const channelToken = headers['x-goog-channel-token']
-  console.log(channelToken)
 
   if (typeof channelToken !== 'string') {
     logger.warn(INVALID_CHANNEL_TOKEN, { token: channelToken })
