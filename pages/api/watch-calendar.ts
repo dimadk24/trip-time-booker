@@ -1,6 +1,3 @@
-import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import { GoogleCalendarService } from '@/src/services/google-calendar'
-import { getCredentials } from '@/src/services/user-meta'
 import { type Response } from 'express'
 import type { NextApiRequest } from 'next'
 import supertokens from 'supertokens-node'
@@ -8,6 +5,9 @@ import { type SessionRequest } from 'supertokens-node/framework/express'
 import { superTokensNextWrapper } from 'supertokens-node/nextjs'
 import { verifySession } from 'supertokens-node/recipe/session/framework/express'
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
+import { getBackendConfig } from '@/src/config/supertokens/backend-config'
+import { getCredentials } from '@/src/services/user-meta'
+import { GoogleCalendarService } from '@/src/services/google-calendar'
 
 type ResponseData = {
   message: string
