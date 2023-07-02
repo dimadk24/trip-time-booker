@@ -18,6 +18,7 @@ export type Credentials = Parameters<
 type CalendarClient = ReturnType<(typeof google)['calendar']>
 
 const FAILED_TO_UNREGISTER_WEBHOOK = `Failed to unregister calendar webhook`
+const webhookName = backendEnv.NODE_ENV === 'production' ? 'main' : 'dev-main'
 
 export class GoogleCalendarService {
   client: CalendarClient
@@ -49,7 +50,7 @@ export class GoogleCalendarService {
     const { data } = await this.client.events.watch({
       calendarId: 'primary',
       requestBody: {
-        id: 'main',
+        id: webhookName,
         token: encryptData(this.userId),
         type: 'webhook',
         address: webhookURL,
