@@ -10,8 +10,8 @@ export const getCredentials = async (
 export const getCalendarWebhookData = async (
   userId: string
 ): Promise<{
-  calendarWebhookId: string | null
-  calendarWebhookResourceId: string | null
+  calendarWebhookId: string | undefined
+  calendarWebhookResourceId: string | undefined
 }> => {
   const { metadata } = await UserMetadata.getUserMetadata(userId)
   return {

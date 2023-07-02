@@ -6,12 +6,18 @@ import { superTokensNextWrapper } from 'supertokens-node/nextjs'
 import { verifySession } from 'supertokens-node/recipe/session/framework/express'
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import { getCredentials } from '@/src/services/user-meta'
+import {
+  getCalendarWebhookData,
+  getCredentials,
+} from '@/src/services/user-meta'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
+import { createAppLogger } from '@/src/utils/logger'
 
 type ResponseData = {
   message: string
 }
+
+const logger = createAppLogger('watch-calendar')
 
 supertokens.init(getBackendConfig())
 
@@ -30,6 +36,18 @@ export default async function watchCalendar(
     return res.status(400).json({ message: 'No session provided' })
 
   const userId = req.session.getUserId()
+
+  const { calendarWebhookId, calendarWebhookResourceId } =
+    await getCalendarWebhookData(userId)
+
+  if (calendarWebhookId || calendarWebhookResourceId) {
+    logger.warn(
+      "Trying to register calendar webhook while it's already registered"
+    )
+    return res
+      .status(400)
+      .json({ message: 'Calendar webhook is already registered' })
+  }
 
   const credentials = await getCredentials(userId)
   const calendarClient = new GoogleCalendarService(credentials, userId)
