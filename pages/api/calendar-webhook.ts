@@ -96,7 +96,7 @@ export default async function calendarWebhook(
       return
     }
     if (!event.start?.dateTime) {
-      logger.warn('No start datetime for event, skipping', { eventId, userId })
+      logger.debug('No start datetime for event, skipping', { eventId, userId })
       return
     }
     const firestoreDocId = createFirestoreIdForEvent(event)
