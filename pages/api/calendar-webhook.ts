@@ -22,7 +22,7 @@ type CalendarEvent = Awaited<
 
 const TRIP_EVENT_GAP = 5 * 60 // 5 min
 
-const logger = createAppLogger('calendar-webhook')
+const moduleLogger = createAppLogger('calendar-webhook')
 
 supertokens.init(getBackendConfig())
 
@@ -41,45 +41,49 @@ export default async function calendarWebhook(
   req: NextApiRequest & Request,
   res: NextApiResponse & Response
 ) {
-  logger.debug('Calendar webhook called')
+  moduleLogger.debug('Calendar webhook called')
   const { headers } = req
 
   const channelToken = headers['x-goog-channel-token']
 
   if (typeof channelToken !== 'string') {
-    logger.warn(INVALID_CHANNEL_TOKEN, { token: channelToken })
+    moduleLogger.warn({ token: channelToken }, INVALID_CHANNEL_TOKEN)
     return res.status(401).send(INVALID_CHANNEL_TOKEN)
   }
 
   const userId = decryptData(channelToken)
   const user = await ThirdPartyNode.getUserById(userId)
   if (!user) {
-    logger.warn('No user can be found by channel token', { token: userId })
+    moduleLogger.warn(
+      { token: userId },
+      'No user can be found by channel token'
+    )
     return res.status(401).send(INVALID_CHANNEL_TOKEN)
   }
+  const logger = moduleLogger.child({ userId })
 
   const resourceState = headers['x-goog-resource-state']
 
   if (resourceState === 'sync') {
-    logger.info('Confirmed registration with sync event', { userId })
+    logger.info('Confirmed registration with sync event')
     return res.status(200).send('OK')
   } else if (resourceState === 'not_exists') {
     logger.info('Received event for removed resource, skipping')
     return res.status(200).send('OK')
   } else if (resourceState === 'exists') {
-    logger.info('Received event for new resouce, processing', { userId })
+    logger.info('Received event for new resouce, processing')
   } else {
-    logger.error(INVALID_RESOURCE_STATE, { resourceState })
+    logger.error({ resourceState }, INVALID_RESOURCE_STATE)
     return res.status(400).send(INVALID_RESOURCE_STATE)
   }
 
   const resouceId = headers['x-goog-resource-id']
   if (typeof resouceId !== 'string') {
-    logger.warn(INVALID_RESOUCE_ID, { resouceId })
+    logger.warn({ resouceId }, INVALID_RESOUCE_ID)
     return res.status(400).send(INVALID_RESOUCE_ID)
   }
 
-  logger.debug('Validation checks passed, processing event', { userId })
+  logger.debug('Validation checks passed, processing event')
 
   const credentials = await getCredentials(userId)
 
@@ -91,12 +95,13 @@ export default async function calendarWebhook(
 
   const promises = justCreatedEvents.map(async (event) => {
     const eventId = event.id
+    const eventLogger = logger.child({ eventId })
     if (!event.location) {
-      logger.debug('No location for event, skipping', { eventId, userId })
+      eventLogger.debug('No location for event, skipping')
       return
     }
     if (!event.start?.dateTime) {
-      logger.debug('No start datetime for event, skipping', { eventId, userId })
+      eventLogger.debug('No start datetime for event, skipping')
       return
     }
     const firestoreDocId = createFirestoreIdForEvent(event)
@@ -105,20 +110,16 @@ export default async function calendarWebhook(
       .doc(firestoreDocId)
     const doc = await eventRef.get()
 
+    const firestoreLogger = eventLogger.child({ firestoreDocId })
+
     if (doc.exists) {
-      logger.info('Firestore doc already exists for event, skipping', {
-        userId,
-        eventId,
-        firestoreDocId,
-      })
+      firestoreLogger.info('Firestore doc already exists for event, skipping')
       return
     }
 
-    logger.debug('No doc for event found in firestore, processing event', {
-      userId,
-      eventId,
-      firestoreDocId,
-    })
+    firestoreLogger.debug(
+      'No doc for event found in firestore, processing event'
+    )
 
     const arrivalTimestamp =
       Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
@@ -141,11 +142,7 @@ export default async function calendarWebhook(
     await eventRef.set({
       processed: true,
     })
-    logger.debug('Created firestore doc for the processed event', {
-      userId,
-      eventId,
-      firestoreDocId,
-    })
+    firestoreLogger.debug('Created firestore doc for the processed event')
   })
 
   await Promise.all(promises)

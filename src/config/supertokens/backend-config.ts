@@ -51,14 +51,17 @@ export const getBackendConfig = (): TypeInput => {
                 if (response.status === 'OK') {
                   const userId = response.user.id
                   logger.debug(
-                    'signInUpPost successful on provider, processing post auth',
-                    { userId }
+                    { userId },
+                    'signInUpPost successful on provider, processing post auth'
                   )
                   postAuth(userId, response.authCodeResponse)
                 } else {
-                  logger.warn('signInUpPost not successful on provider', {
-                    response,
-                  })
+                  logger.warn(
+                    {
+                      response,
+                    },
+                    'signInUpPost not successful on provider'
+                  )
                 }
 
                 return response

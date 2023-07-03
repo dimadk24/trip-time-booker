@@ -1,14 +1,8 @@
 import { cleanEnv, json, port, str, url } from 'envalid'
-import winston from 'winston'
+import { pino } from 'pino'
 
-type LogLevel =
-  | 'error'
-  | 'warn'
-  | 'info'
-  | 'http'
-  | 'verbose'
-  | 'debug'
-  | 'silly'
+type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+const logLevels = Object.values(pino.levels.labels) as LogLevel[]
 
 export const backendEnv = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ['development', 'test', 'production'] as const }),
@@ -23,7 +17,7 @@ export const backendEnv = cleanEnv(process.env, {
   GOOGLE_MAPS_API_KEY: str(),
   LOGTAIL_TOKEN: str({ devDefault: '' }),
   LOG_LEVEL: str({
-    choices: Object.keys(winston.config.npm.levels) as LogLevel[],
+    choices: logLevels,
     default: 'info',
   }),
   HOME_LOCATION: str(),
