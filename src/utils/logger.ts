@@ -1,28 +1,37 @@
-import winston from 'winston'
-import { Logtail } from '@logtail/node'
-import { LogtailTransport } from '@logtail/winston'
+import os from 'os'
+import pino from 'pino'
 import { backendEnv } from '../config/backend-env'
 
-const rootLogger = winston.createLogger({
-  level: backendEnv.LOG_LEVEL,
-  format: winston.format.json(),
-  transports: [],
+const targets: (pino.TransportTargetOptions | string)[] = [
+  {
+    target: 'pino-pretty',
+    options: {},
+    level: backendEnv.LOG_LEVEL,
+  },
+  backendEnv.LOGTAIL_TOKEN && {
+    target: '@logtail/pino',
+    options: {
+      sourceToken: backendEnv.LOGTAIL_TOKEN,
+    },
+    level: backendEnv.LOG_LEVEL,
+  },
+].filter(Boolean)
+
+const transport = pino.transport({
+  targets: targets as pino.TransportTargetOptions[],
 })
 
-rootLogger.add(
-  new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    ),
-  })
+const rootLogger = pino(
+  {
+    ...transport,
+    base: {
+      hostname: os.hostname,
+    },
+    level: backendEnv.LOG_LEVEL,
+  },
+  transport
 )
 
-if (backendEnv.LOGTAIL_TOKEN) {
-  const logtail = new Logtail(backendEnv.LOGTAIL_TOKEN)
-  rootLogger.add(new LogtailTransport(logtail))
-}
+const createAppLogger = (name: string) => rootLogger.child({ name: name })
 
-const createAppLogger = (logger: string) => rootLogger.child({ logger: logger })
-
-export { rootLogger, createAppLogger }
+export { createAppLogger }

@@ -1,3 +1,4 @@
+import { type pino } from 'pino'
 import { google } from 'googleapis'
 import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
@@ -8,8 +9,6 @@ const WEBHOOK_DOMAIN =
   backendEnv.NODE_ENV === 'development'
     ? backendEnv.DEV_LOCAL_WEBHOOK_DOMAIN
     : frontendEnv.NEXT_PUBLIC_APP_DOMAIN
-
-const logger = createAppLogger('google-calendar')
 
 export type Credentials = Parameters<
   InstanceType<(typeof google)['auth']['OAuth2']>['setCredentials']
@@ -24,6 +23,8 @@ export class GoogleCalendarService {
   client: CalendarClient
 
   userId: string
+
+  logger: pino.BaseLogger
 
   constructor(credentials: Credentials, userId: string) {
     const oauth2Client = new google.auth.OAuth2({
@@ -40,10 +41,12 @@ export class GoogleCalendarService {
     })
 
     this.userId = userId
+    const logger = createAppLogger('google-calendar')
+    this.logger = logger.child({ userId })
   }
 
   async registerWebhook() {
-    logger.debug('Registering calendar webhook', { userId: this.userId })
+    this.logger.debug('Registering calendar webhook')
 
     const webhookURL = `${WEBHOOK_DOMAIN}/api/calendar-webhook`
 
@@ -58,19 +61,20 @@ export class GoogleCalendarService {
     })
     const { id, resourceId } = data
 
-    logger.info('Calendar webhook registered', {
-      userId: this.userId,
-      webhookResouceId: resourceId,
-      webhookURL,
-      webhookId: id,
-    })
+    this.logger.info(
+      {
+        webhookResouceId: resourceId,
+        webhookURL,
+        webhookName,
+        webhookId: id,
+      },
+      'Calendar webhook registered'
+    )
     return { id, resourceId }
   }
 
   async unregisterWebhook(id: string, resourceId: string) {
-    logger.debug('Unregistering calendar webhook', {
-      userId: this.userId,
-    })
+    this.logger.debug('Unregistering calendar webhook')
 
     const { status, data } = await this.client.channels.stop({
       requestBody: {
@@ -79,23 +83,27 @@ export class GoogleCalendarService {
       },
     })
     if (status !== 204) {
-      logger.error(FAILED_TO_UNREGISTER_WEBHOOK, {
-        userId: this.userId,
-        webhookResourceId: resourceId,
-        webhookId: id,
-        calendarApi: {
-          statusCode: status,
-          data,
+      this.logger.error(
+        {
+          webhookResourceId: resourceId,
+          webhookId: id,
+          calendarApi: {
+            statusCode: status,
+            data,
+          },
         },
-      })
+        FAILED_TO_UNREGISTER_WEBHOOK
+      )
       throw new Error(FAILED_TO_UNREGISTER_WEBHOOK)
     }
 
-    logger.info('Successfully unregistered calendar webhook', {
-      userId: this.userId,
-      webhookResouceId: resourceId,
-      webhookId: id,
-    })
+    this.logger.info(
+      {
+        webhookResouceId: resourceId,
+        webhookId: id,
+      },
+      'Successfully unregistered calendar webhook'
+    )
     return { id, resourceId }
   }
 
@@ -103,9 +111,7 @@ export class GoogleCalendarService {
     const fiveMinBefore = new Date()
     fiveMinBefore.setMinutes(fiveMinBefore.getMinutes() - 5)
 
-    logger.debug('Getting recently changed events', {
-      userId: this.userId,
-    })
+    this.logger.debug('Getting recently changed events')
     const response = await this.client.events.list({
       calendarId: 'primary',
       timeMin: new Date().toISOString(),
@@ -113,10 +119,7 @@ export class GoogleCalendarService {
       showDeleted: false,
     })
     const items = response.data.items || []
-    logger.info('Got recently changed events', {
-      count: items.length,
-      userId: this.userId,
-    })
+    this.logger.info(`Got ${items.length} recently changed events`)
 
     return items
   }
@@ -136,15 +139,13 @@ export class GoogleCalendarService {
       },
     }
 
-    logger.debug('Creating trip event', { userId: this.userId })
+    this.logger.debug('Creating trip event')
 
     await this.client.events.insert({
       calendarId: 'primary',
       requestBody: params,
     })
 
-    logger.info('Successfully created trip event', {
-      userId: this.userId,
-    })
+    this.logger.info('Successfully created trip event')
   }
 }

@@ -18,8 +18,11 @@ try {
    */
   // @ts-ignore
   if (!/already exists/u.test(error?.message)) {
-    // @ts-ignore
-    logger.error('Firebase admin initialization error', error?.stack)
+    logger.error(
+      // @ts-ignore
+      { errorStack: error?.stack },
+      'Firebase admin initialization error'
+    )
   }
 }
 

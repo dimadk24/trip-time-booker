@@ -7,8 +7,6 @@ import {
 import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
 
-const logger = createAppLogger('google-maps')
-
 export const getTripDuration = async (
   origin: string,
   destination: string,
@@ -17,7 +15,10 @@ export const getTripDuration = async (
 ) => {
   const client = new Client()
 
-  logger.debug('Getting distance from maps')
+  const logger = createAppLogger('google-maps')
+  const userLogger = logger.child({ userId })
+
+  userLogger.debug('Getting distance from maps')
 
   const eventData = {
     arrival_time: arrivalTime,
@@ -39,13 +40,15 @@ export const getTripDuration = async (
 
   const status = firstEl.status
   if (status !== Status.OK) {
-    logger.error('Invalid row status from google maps', {
-      userId,
-      status,
-    })
+    userLogger.error(
+      {
+        status,
+      },
+      'Invalid row status from google maps'
+    )
     throw new Error('Invalid status')
   }
-  logger.info('Successfully got distance matrix from maps')
+  userLogger.info('Successfully got distance matrix from maps')
 
   return firstEl.duration.value
 }
