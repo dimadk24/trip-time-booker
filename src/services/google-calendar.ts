@@ -65,7 +65,6 @@ export class GoogleCalendarService {
       {
         webhookResouceId: resourceId,
         webhookURL,
-        webhookName,
         webhookId: id,
       },
       'Calendar webhook registered'
