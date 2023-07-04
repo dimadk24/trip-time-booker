@@ -54,6 +54,7 @@ export const getBackendConfig = (): TypeInput => {
                     { userId },
                     'signInUpPost successful on provider, processing post auth'
                   )
+                  console.log(response.authCodeResponse)
                   postAuth(userId, response.authCodeResponse)
                 } else {
                   logger.warn(
