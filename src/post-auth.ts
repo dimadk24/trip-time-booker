@@ -31,13 +31,14 @@ export async function postAuth(
   authCodeResponse: AuthCodeResponse
 ) {
   const credentials = convertAuthCodeResponse(authCodeResponse)
+  const userLogger = logger.child({ userId })
 
-  if (!credentials.refresh_token) {
-    logger.error({ userId }, 'No refresh token on credentials')
-    throw new Error('No refresh token on credentials')
+  if (credentials.refresh_token) {
+    await UserMetadata.updateUserMetadata(userId, {
+      googleOAuthRefreshToken: encryptData(credentials.refresh_token),
+    })
+    userLogger.info('Set refresh token')
+  } else {
+    userLogger.debug('Subsequent user auth without refresh token')
   }
-
-  await UserMetadata.updateUserMetadata(userId, {
-    googleOAuthRefreshToken: encryptData(credentials.refresh_token),
-  })
 }
