@@ -119,7 +119,7 @@ export class GoogleCalendarService {
       showDeleted: false,
     })
     const items = response.data.items || []
-    this.logger.info(`Got ${items.length} recently changed events`)
+    this.logger.info(`Got ${items.length} recently changed event(s)`)
 
     return items
   }
