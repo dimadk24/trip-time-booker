@@ -1,6 +1,8 @@
 import UserMetadata from 'supertokens-node/recipe/usermetadata'
 
 import { Credentials } from './services/google-calendar'
+import { encryptData } from './utils/encryption'
+import { createAppLogger } from './utils/logger'
 
 type AuthCodeResponse = {
   access_token: string
@@ -22,13 +24,20 @@ const convertAuthCodeResponse = (
   id_token: authCodeResponse.id_token,
 })
 
+const logger = createAppLogger('post-auth')
+
 export async function postAuth(
   userId: string,
   authCodeResponse: AuthCodeResponse
 ) {
   const credentials = convertAuthCodeResponse(authCodeResponse)
 
+  if (!credentials.refresh_token) {
+    logger.error({ userId }, 'No refresh token on credentials')
+    throw new Error('No refresh token on credentials')
+  }
+
   await UserMetadata.updateUserMetadata(userId, {
-    googleOAuthRefreshToken: credentials.refresh_token,
+    googleOAuthRefreshToken: encryptData(credentials.refresh_token),
   })
 }
