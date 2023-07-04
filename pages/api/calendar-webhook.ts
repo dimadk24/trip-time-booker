@@ -28,8 +28,14 @@ supertokens.init(getBackendConfig())
 
 const firestore = firebaseAdmin.firestore
 
-const createFirestoreIdForEvent = (event: CalendarEvent) => {
-  return hash(`${event.id}-${event.start?.dateTime}-${event.location}`)
+const createFirestoreIdForEvent = (userId: string, event: CalendarEvent) => {
+  if (!event.start?.dateTime) {
+    throw new Error(`start.dateTime does not exist for the event ${event.id}`)
+  }
+  const string = [userId, event.id, event.start.dateTime, event.location].join(
+    '-'
+  )
+  return hash(string)
 }
 
 const PROCESSED_EVENTS_COLLECTION =
@@ -104,7 +110,7 @@ export default async function calendarWebhook(
       eventLogger.debug('No start datetime for event, skipping')
       return
     }
-    const firestoreDocId = createFirestoreIdForEvent(event)
+    const firestoreDocId = createFirestoreIdForEvent(userId, event)
     const eventRef = db
       .collection(PROCESSED_EVENTS_COLLECTION)
       .doc(firestoreDocId)
