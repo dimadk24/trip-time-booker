@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import supertokens from 'supertokens-node'
+import * as Sentry from '@sentry/nextjs'
 import { getCredentials } from '@/src/services/user-meta'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
@@ -110,11 +111,23 @@ export default async function calendarWebhook(
       eventLogger.debug('No start datetime for event, skipping')
       return
     }
+    const transaction = Sentry.getCurrentHub().getScope().getTransaction()
+    if (!transaction) {
+      eventLogger.error('No Sentry transaction')
+      throw new Error('No sentry transaction')
+    }
+
     const firestoreDocId = createFirestoreIdForEvent(userId, event)
+
+    let span = transaction.startChild({
+      op: 'firestore',
+      description: 'get doc',
+    })
     const eventRef = db
       .collection(PROCESSED_EVENTS_COLLECTION)
       .doc(firestoreDocId)
     const doc = await eventRef.get()
+    span.finish()
 
     const firestoreLogger = eventLogger.child({ firestoreDocId })
 
@@ -130,12 +143,17 @@ export default async function calendarWebhook(
     const arrivalTimestamp =
       Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
 
+    span = transaction.startChild({
+      op: 'maps',
+      description: 'get trip duration',
+    })
     const duration = await getTripDuration(
       backendEnv.HOME_LOCATION,
       event.location,
       arrivalTimestamp,
       userId
     )
+    span.finish()
 
     const startTimestamp = arrivalTimestamp - duration
     const startDate = new Date(startTimestamp * 1000)
@@ -143,11 +161,21 @@ export default async function calendarWebhook(
 
     const possiblePlaceName = event.location.split(',')[0]
 
+    span = transaction.startChild({
+      op: 'calendar',
+      description: 'create trip event',
+    })
     await calendarService.createTripEvent(startDate, endDate, possiblePlaceName)
+    span.finish()
 
+    span = transaction.startChild({
+      op: 'firestore',
+      description: 'save event',
+    })
     await eventRef.set({
       processed: true,
     })
+    span.finish()
     firestoreLogger.debug('Created firestore doc for the processed event')
   })
 
