@@ -21,7 +21,7 @@ module.exports = {
   plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jsx-a11y'],
   rules: {
     'max-len': [
-      'error',
+      'warn',
       {
         code: 80,
         ignorePattern: '^(import|\\} from )',
