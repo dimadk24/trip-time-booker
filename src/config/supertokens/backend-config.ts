@@ -1,6 +1,5 @@
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import SessionNode from 'supertokens-node/recipe/session'
-import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import Dashboard from 'supertokens-node/recipe/dashboard'
 import { TypeInput } from 'supertokens-node/types'
 import { backendEnv } from '../backend-env'
@@ -71,7 +70,6 @@ export const getBackendConfig = (): TypeInput => {
         },
       }),
       SessionNode.init(),
-      UserMetadata.init(),
       Dashboard.init(),
     ],
     isInServerlessEnv: true,

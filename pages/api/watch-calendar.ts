@@ -4,11 +4,11 @@ import supertokens from 'supertokens-node'
 import { type SessionRequest } from 'supertokens-node/framework/express'
 import { superTokensNextWrapper } from 'supertokens-node/nextjs'
 import { verifySession } from 'supertokens-node/recipe/session/framework/express'
-import UserMetadata from 'supertokens-node/recipe/usermetadata'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import {
   getCalendarWebhookData,
   getCredentials,
+  setUserMeta,
 } from '@/src/services/user-meta'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { createAppLogger } from '@/src/utils/logger'
@@ -54,7 +54,7 @@ export default async function watchCalendar(
 
   const { id, resourceId } = await calendarClient.registerWebhook()
 
-  await UserMetadata.updateUserMetadata(userId, {
+  await setUserMeta(userId, {
     calendarWebhookId: id,
     calendarWebhookResourceId: resourceId,
   })

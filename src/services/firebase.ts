@@ -1,4 +1,4 @@
-import admin from 'firebase-admin'
+import firebase from 'firebase-admin'
 import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
 
@@ -7,9 +7,9 @@ const firebaseConfig = backendEnv.GOOGLE_FIREBASE_KEY
 const logger = createAppLogger('firebase')
 
 try {
-  admin.initializeApp({
+  firebase.initializeApp({
     // @ts-ignore
-    credential: admin.credential.cert(firebaseConfig),
+    credential: firebase.credential.cert(firebaseConfig),
   })
 } catch (error) {
   /*
@@ -26,4 +26,4 @@ try {
   }
 }
 
-export { admin as firebaseAdmin }
+export { firebase }

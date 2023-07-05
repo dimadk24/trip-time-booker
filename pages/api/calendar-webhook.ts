@@ -9,9 +9,9 @@ import { getTripDuration } from '@/src/services/google-maps'
 import { backendEnv } from '@/src/config/backend-env'
 import { createAppLogger } from '@/src/utils/logger'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import { firebaseAdmin } from '@/src/services/firebase'
 import { hash } from '@/src/utils/hasher'
 import { decryptData } from '@/src/utils/encryption'
+import { firestore } from '@/src/services/firestore'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
@@ -26,8 +26,6 @@ const TRIP_EVENT_GAP = 5 * 60 // 5 min
 const moduleLogger = createAppLogger('calendar-webhook')
 
 supertokens.init(getBackendConfig())
-
-const firestore = firebaseAdmin.firestore
 
 const createFirestoreIdForEvent = (userId: string, event: CalendarEvent) => {
   if (!event.start?.dateTime) {
@@ -98,8 +96,6 @@ export default async function calendarWebhook(
 
   const justCreatedEvents = await calendarService.getJustChangedEvents()
 
-  const db = firestore()
-
   const promises = justCreatedEvents.map(async (event) => {
     const eventId = event.id
     const eventLogger = logger.child({ eventId })
@@ -123,7 +119,7 @@ export default async function calendarWebhook(
       op: 'firestore',
       description: 'get doc',
     })
-    const eventRef = db
+    const eventRef = firestore
       .collection(PROCESSED_EVENTS_COLLECTION)
       .doc(firestoreDocId)
     const doc = await eventRef.get()

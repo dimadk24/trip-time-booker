@@ -1,8 +1,7 @@
-import UserMetadata from 'supertokens-node/recipe/usermetadata'
-
 import { Credentials } from './services/google-calendar'
 import { encryptData } from './utils/encryption'
 import { createAppLogger } from './utils/logger'
+import { setUserMeta } from './services/user-meta'
 
 type AuthCodeResponse = {
   access_token: string
@@ -34,7 +33,7 @@ export async function postAuth(
   const userLogger = logger.child({ userId })
 
   if (credentials.refresh_token) {
-    await UserMetadata.updateUserMetadata(userId, {
+    await setUserMeta(userId, {
       googleOAuthRefreshToken: encryptData(credentials.refresh_token),
     })
     userLogger.info('Set refresh token')
