@@ -2,6 +2,7 @@ import { type CollectionReference } from 'firebase-admin/firestore'
 import { decryptData } from '../utils/encryption'
 import { createAppLogger } from '../utils/logger'
 import { backendEnv } from '../config/backend-env'
+import { getSentryTransaction } from '../utils/sentry'
 import { firestore } from './firestore'
 
 type UserMetaData = {
@@ -29,14 +30,23 @@ const getUsersCollection = () => {
 
 export const getUserMeta = async (userId: string): Promise<UserMetaData> => {
   const userLogger = logger.child({ userId })
+
+  const transaction = getSentryTransaction()
+
+  const span = transaction.startChild({
+    op: 'user-meta',
+    description: 'get user meta',
+  })
   userLogger.debug('Getting user meta')
   const doc = getUsersCollection().doc(userId)
   const docRef = await doc.get()
   if (!docRef.exists) {
     await doc.set(initialData)
+    span.finish()
     userLogger.info('UserMeta doc did not exist, created')
     return initialData
   }
+  span.finish()
   userLogger.info('Got user meta')
   return docRef.data() as UserMetaData
 }
@@ -45,9 +55,19 @@ export const setUserMeta = async (
   userId: string,
   data: Partial<UserMetaData>
 ) => {
-  logger.debug({ userId }, 'Setting user meta')
+  const userLogger = logger.child({ userId })
+  userLogger.debug('Setting user meta')
+
+  const transaction = getSentryTransaction()
+  const span = transaction.startChild({
+    op: 'user-meta',
+    description: 'set user meta',
+  })
+
   await getUsersCollection().doc(userId).set(data, { merge: true })
-  logger.info({ userId }, 'Set user meta')
+
+  span.finish()
+  userLogger.info('Set user meta')
 }
 
 export const getCredentials = async (

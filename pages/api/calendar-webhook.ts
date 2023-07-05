@@ -2,7 +2,6 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { type Request, Response } from 'express'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import supertokens from 'supertokens-node'
-import * as Sentry from '@sentry/nextjs'
 import { getCredentials } from '@/src/services/user-meta'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
@@ -12,6 +11,7 @@ import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import { hash } from '@/src/utils/hasher'
 import { decryptData } from '@/src/utils/encryption'
 import { firestore } from '@/src/services/firestore'
+import { getSentryTransaction } from '@/src/utils/sentry'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
@@ -107,11 +107,8 @@ export default async function calendarWebhook(
       eventLogger.debug('No start datetime for event, skipping')
       return
     }
-    const transaction = Sentry.getCurrentHub().getScope().getTransaction()
-    if (!transaction) {
-      eventLogger.error('No Sentry transaction')
-      throw new Error('No sentry transaction')
-    }
+
+    const transaction = getSentryTransaction()
 
     const firestoreDocId = createFirestoreIdForEvent(userId, event)
 
