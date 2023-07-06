@@ -1,7 +1,11 @@
 const { withSentryConfig } = require('@sentry/nextjs')
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const nextConfig = {
+  experimental: {
+    appDir: false,
+  },
+}
 
 module.exports = withSentryConfig(
   nextConfig,
