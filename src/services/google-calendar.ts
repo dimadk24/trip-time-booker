@@ -16,6 +16,10 @@ export type Credentials = Parameters<
 
 type CalendarClient = ReturnType<(typeof google)['calendar']>
 
+export type CalendarEvent = Awaited<
+  ReturnType<InstanceType<typeof GoogleCalendarService>['getJustChangedEvents']>
+>[number]
+
 const FAILED_TO_UNREGISTER_WEBHOOK = `Failed to unregister calendar webhook`
 const webhookName = backendEnv.NODE_ENV === 'production' ? 'main' : 'dev-main'
 
@@ -123,7 +127,7 @@ export class GoogleCalendarService {
     return items
   }
 
-  async createTripEvent(start: Date, end: Date, placeName: string) {
+  async createTripEvent(start: Date, end: Date, placeName: string): string {
     const params = {
       start: {
         dateTime: start.toISOString(),
@@ -140,11 +144,12 @@ export class GoogleCalendarService {
 
     this.logger.debug('Creating trip event')
 
-    await this.client.events.insert({
+    const response = await this.client.events.insert({
       calendarId: 'primary',
       requestBody: params,
     })
 
     this.logger.info('Successfully created trip event')
+    return response.data.id
   }
 }

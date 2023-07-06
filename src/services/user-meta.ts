@@ -17,12 +17,12 @@ const initialData = {
   calendarWebhookResourceId: null,
 }
 
-const USERS_COLLECTIONS =
+export const USERS_COLLECTIONS =
   backendEnv.NODE_ENV === 'production' ? 'users' : 'dev-users'
 
 const logger = createAppLogger('user-meta')
 
-const getUsersCollection = () => {
+export const getUsersCollection = () => {
   return firestore.collection(
     USERS_COLLECTIONS
   ) as CollectionReference<UserMetaData>
