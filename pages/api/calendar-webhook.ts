@@ -3,23 +3,22 @@ import { type Request, Response } from 'express'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import supertokens from 'supertokens-node'
 import { getCredentials } from '@/src/services/user-meta'
-import { GoogleCalendarService } from '@/src/services/google-calendar'
+import {
+  CalendarEvent,
+  GoogleCalendarService,
+} from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
 import { backendEnv } from '@/src/config/backend-env'
 import { createAppLogger } from '@/src/utils/logger'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import { hash } from '@/src/utils/hasher'
 import { decryptData } from '@/src/utils/encryption'
-import { firestore } from '@/src/services/firestore'
 import { getSentryTransaction } from '@/src/utils/sentry'
+import { createEventHash, getEventDoc } from '@/src/services/processed-events'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
 const INVALID_RESOURCE_STATE = 'Invalid x-goog-resource-state header'
-
-type CalendarEvent = Awaited<
-  ReturnType<InstanceType<typeof GoogleCalendarService>['getJustChangedEvents']>
->[number]
 
 const TRIP_EVENT_GAP = 5 * 60 // 5 min
 
@@ -36,11 +35,6 @@ const createFirestoreIdForEvent = (userId: string, event: CalendarEvent) => {
   )
   return hash(string)
 }
-
-const PROCESSED_EVENTS_COLLECTION =
-  backendEnv.NODE_ENV === 'production'
-    ? 'processed-events'
-    : 'dev-processed-events'
 
 export default async function calendarWebhook(
   req: NextApiRequest & Request,
@@ -112,20 +106,14 @@ export default async function calendarWebhook(
 
     const firestoreDocId = createFirestoreIdForEvent(userId, event)
 
-    let span = transaction.startChild({
-      op: 'firestore',
-      description: 'get doc',
-    })
-    const eventRef = firestore
-      .collection(PROCESSED_EVENTS_COLLECTION)
-      .doc(firestoreDocId)
-    const doc = await eventRef.get()
-    span.finish()
+    const { doc, eventRef } = await getEventDoc(userId, event)
 
     const firestoreLogger = eventLogger.child({ firestoreDocId })
 
-    if (doc.exists) {
-      firestoreLogger.info('Firestore doc already exists for event, skipping')
+    if (doc.exists && doc.data()?.hash === createEventHash(event)) {
+      firestoreLogger.info(
+        'Firestore doc already exists for current event version, skipping'
+      )
       return
     }
 
@@ -136,7 +124,7 @@ export default async function calendarWebhook(
     const arrivalTimestamp =
       Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
 
-    span = transaction.startChild({
+    let span = transaction.startChild({
       op: 'maps',
       description: 'get trip duration',
     })
@@ -158,7 +146,11 @@ export default async function calendarWebhook(
       op: 'calendar',
       description: 'create trip event',
     })
-    await calendarService.createTripEvent(startDate, endDate, possiblePlaceName)
+    const tripEventId = await calendarService.createTripEvent(
+      startDate,
+      endDate,
+      possiblePlaceName
+    )
     span.finish()
 
     span = transaction.startChild({
@@ -167,6 +159,9 @@ export default async function calendarWebhook(
     })
     await eventRef.set({
       processed: true,
+      deleted: false,
+      hash: createEventHash(event),
+      tripEventId,
     })
     span.finish()
     firestoreLogger.debug('Created firestore doc for the processed event')
