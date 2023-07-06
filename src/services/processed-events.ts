@@ -10,7 +10,7 @@ import { hash } from '../utils/hasher'
 import { CalendarEvent } from './google-calendar'
 import { getUsersCollection } from './user-meta'
 
-type ProcessedEvent = {
+export type ProcessedEvent = {
   processed: true
   tripEventId: string
   deleted: boolean

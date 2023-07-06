@@ -127,7 +127,11 @@ export class GoogleCalendarService {
     return items
   }
 
-  async createTripEvent(start: Date, end: Date, placeName: string): string {
+  async createTripEvent(
+    start: Date,
+    end: Date,
+    placeName: string
+  ): Promise<string> {
     const params = {
       start: {
         dateTime: start.toISOString(),
@@ -150,6 +154,24 @@ export class GoogleCalendarService {
     })
 
     this.logger.info('Successfully created trip event')
+    if (typeof response.data.id !== 'string') {
+      this.logger.error(
+        { id: response.data.id },
+        'Not valid id for created trip event'
+      )
+      throw new Error('Not valid id for created trip event')
+    }
     return response.data.id
+  }
+
+  async deleteTripEvent(id: string) {
+    this.logger.debug({ eventId: id }, 'Deleting trip event')
+
+    await this.client.events.delete({
+      calendarId: 'primary',
+      eventId: id,
+    })
+
+    this.logger.info({ eventId: id }, 'Deleted trip event')
   }
 }

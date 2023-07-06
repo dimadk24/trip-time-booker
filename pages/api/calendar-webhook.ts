@@ -14,7 +14,11 @@ import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import { hash } from '@/src/utils/hasher'
 import { decryptData } from '@/src/utils/encryption'
 import { getSentryTransaction } from '@/src/utils/sentry'
-import { createEventHash, getEventDoc } from '@/src/services/processed-events'
+import {
+  ProcessedEvent,
+  createEventHash,
+  getEventDoc,
+} from '@/src/services/processed-events'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
@@ -110,16 +114,19 @@ export default async function calendarWebhook(
 
     const firestoreLogger = eventLogger.child({ firestoreDocId })
 
-    if (doc.exists && doc.data()?.hash === createEventHash(event)) {
-      firestoreLogger.info(
-        'Firestore doc already exists for current event version, skipping'
+    if (doc.exists) {
+      if (doc.data()?.hash === createEventHash(event)) {
+        firestoreLogger.info(
+          'Firestore doc already exists for current event version, skipping'
+        )
+        return
+      }
+      firestoreLogger.debug(
+        'Firestore doc exists for the outdated version of the event, processsing'
       )
-      return
+    } else {
+      firestoreLogger.debug('No doc for event found in firestore, processing')
     }
-
-    firestoreLogger.debug(
-      'No doc for event found in firestore, processing event'
-    )
 
     const arrivalTimestamp =
       Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
@@ -153,6 +160,11 @@ export default async function calendarWebhook(
     )
     span.finish()
 
+    if (doc.exists) {
+      const data = doc.data() as ProcessedEvent
+      await calendarService.deleteTripEvent(data.tripEventId)
+    }
+
     span = transaction.startChild({
       op: 'firestore',
       description: 'save event',
@@ -164,7 +176,11 @@ export default async function calendarWebhook(
       tripEventId,
     })
     span.finish()
-    firestoreLogger.debug('Created firestore doc for the processed event')
+    firestoreLogger.debug(
+      `${
+        doc.exists ? 'Updated' : 'Created'
+      } firestore doc for the processed event`
+    )
   })
 
   await Promise.all(promises)
