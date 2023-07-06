@@ -1,4 +1,4 @@
-import { cleanEnv, json, port, str, url } from 'envalid'
+import { cleanEnv, json, str, url } from 'envalid'
 import { pino } from 'pino'
 
 type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
@@ -6,7 +6,6 @@ const logLevels = Object.values(pino.levels.labels) as LogLevel[]
 
 export const backendEnv = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ['development', 'test', 'production'] as const }),
-  PORT: port(),
 
   SUPERTOKENS_CONNECTION_URI: url(),
   SUPERTOKENS_API_KEY: str(),
