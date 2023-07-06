@@ -40,4 +40,5 @@ export async function postAuth(
   } else {
     userLogger.debug('Subsequent user auth without refresh token')
   }
+  await userLogger.flush()
 }

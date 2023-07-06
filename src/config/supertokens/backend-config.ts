@@ -53,7 +53,7 @@ export const getBackendConfig = (): TypeInput => {
                     { userId },
                     'signInUpPost successful on provider, processing post auth'
                   )
-                  postAuth(userId, response.authCodeResponse)
+                  await postAuth(userId, response.authCodeResponse)
                 } else {
                   logger.warn(
                     {
@@ -62,6 +62,7 @@ export const getBackendConfig = (): TypeInput => {
                     'signInUpPost not successful on provider'
                   )
                 }
+                await logger.flush()
 
                 return response
               },
