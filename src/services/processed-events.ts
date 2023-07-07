@@ -5,7 +5,7 @@ import {
 } from 'firebase-admin/firestore'
 import { createAppLogger } from '../utils/logger'
 import { backendEnv } from '../config/backend-env'
-import { getSentryTransaction } from '../utils/sentry'
+import { withSentrySpan } from '../utils/sentry'
 import { hash } from '../utils/hasher'
 import { CalendarEvent } from './google-calendar'
 import { getUsersCollection } from './user-meta'
@@ -52,17 +52,15 @@ export const getEventDoc = async (
   }
 
   const userLogger = logger.child({ userId })
-  const transaction = getSentryTransaction()
-  const span = transaction.startChild({
-    op: 'processed-events',
-    description: 'get event',
-  })
   userLogger.debug('Getting event doc from firestore')
 
   const eventRef = getEventsCollection(userId).doc(hash(event.id))
-  const doc = await eventRef.get()
+  const doc = await withSentrySpan(
+    () => eventRef.get(),
+    'processed-events',
+    'get event'
+  )
 
-  span.finish()
   userLogger.info('Got event doc from firestore')
   return { eventRef, doc }
 }

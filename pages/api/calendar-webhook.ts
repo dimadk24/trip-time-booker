@@ -1,24 +1,24 @@
+import { Response, type Request } from 'express'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { type Request, Response } from 'express'
-import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import supertokens from 'supertokens-node'
-import { getCredentials } from '@/src/services/user-meta'
+import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
+import { backendEnv } from '@/src/config/backend-env'
+import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import {
   CalendarEvent,
   GoogleCalendarService,
 } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
-import { backendEnv } from '@/src/config/backend-env'
-import { createAppLogger } from '@/src/utils/logger'
-import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import { hash } from '@/src/utils/hasher'
-import { decryptData } from '@/src/utils/encryption'
-import { getSentryTransaction } from '@/src/utils/sentry'
 import {
   ProcessedEvent,
   createEventHash,
   getEventDoc,
 } from '@/src/services/processed-events'
+import { getCredentials } from '@/src/services/user-meta'
+import { decryptData } from '@/src/utils/encryption'
+import { hash } from '@/src/utils/hasher'
+import { createAppLogger } from '@/src/utils/logger'
+import { withSentrySpan } from '@/src/utils/sentry'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
@@ -106,8 +106,6 @@ export default async function calendarWebhook(
       return
     }
 
-    const transaction = getSentryTransaction()
-
     const firestoreDocId = createFirestoreIdForEvent(userId, event)
 
     const { doc, eventRef } = await getEventDoc(userId, event)
@@ -131,17 +129,17 @@ export default async function calendarWebhook(
     const arrivalTimestamp =
       Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
 
-    let span = transaction.startChild({
-      op: 'maps',
-      description: 'get trip duration',
-    })
-    const duration = await getTripDuration(
-      backendEnv.HOME_LOCATION,
-      event.location,
-      arrivalTimestamp,
-      userId
+    const duration = await withSentrySpan(
+      () =>
+        getTripDuration(
+          backendEnv.HOME_LOCATION,
+          event.location as string,
+          arrivalTimestamp,
+          userId
+        ),
+      'maps',
+      'get trip duration'
     )
-    span.finish()
 
     const startTimestamp = arrivalTimestamp - duration
     const startDate = new Date(startTimestamp * 1000)
@@ -149,33 +147,29 @@ export default async function calendarWebhook(
 
     const possiblePlaceName = event.location.split(',')[0]
 
-    span = transaction.startChild({
-      op: 'calendar',
-      description: 'create trip event',
-    })
-    const tripEventId = await calendarService.createTripEvent(
-      startDate,
-      endDate,
-      possiblePlaceName
+    const tripEventId = await withSentrySpan(
+      () =>
+        calendarService.createTripEvent(startDate, endDate, possiblePlaceName),
+      'calendar',
+      'create trip event'
     )
-    span.finish()
 
     if (doc.exists) {
       const data = doc.data() as ProcessedEvent
       await calendarService.deleteTripEvent(data.tripEventId)
     }
 
-    span = transaction.startChild({
-      op: 'firestore',
-      description: 'save event',
-    })
-    await eventRef.set({
-      processed: true,
-      deleted: false,
-      hash: createEventHash(event),
-      tripEventId,
-    })
-    span.finish()
+    await withSentrySpan(
+      () =>
+        eventRef.set({
+          processed: true,
+          deleted: false,
+          hash: createEventHash(event),
+          tripEventId,
+        }),
+      'firestore',
+      'save event'
+    )
     firestoreLogger.debug(
       `${
         doc.exists ? 'Updated' : 'Created'
