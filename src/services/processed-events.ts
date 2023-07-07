@@ -10,12 +10,19 @@ import { hash } from '../utils/hasher'
 import { CalendarEvent } from './google-calendar'
 import { getUsersCollection } from './user-meta'
 
-export type ProcessedEvent = {
-  processed: true
-  tripEventId: string
-  deleted: boolean
-  hash: string
-}
+export type ProcessedEvent =
+  | {
+      processed: true
+      tripEventId: string
+      deleted: false
+      hash: string
+    }
+  | {
+      processed: true
+      tripEventId: null
+      deleted: true
+      hash: string
+    }
 
 const PROCESSED_EVENTS_COLLECTION =
   backendEnv.NODE_ENV === 'production'
@@ -28,7 +35,10 @@ export const createEventHash = (event: CalendarEvent) => {
   if (!event.start?.dateTime) {
     throw new Error(`start.dateTime does not exist for the event ${event.id}`)
   }
-  const string = [event.start.dateTime, event.location].join('-')
+  const deleted = event.status === 'cancelled'
+  const string = [event.start.dateTime, event.location, String(deleted)].join(
+    '-'
+  )
   return hash(string)
 }
 

@@ -4,10 +4,7 @@ import supertokens from 'supertokens-node'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
 import { backendEnv } from '@/src/config/backend-env'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import {
-  CalendarEvent,
-  GoogleCalendarService,
-} from '@/src/services/google-calendar'
+import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
 import {
   ProcessedEvent,
@@ -16,7 +13,6 @@ import {
 } from '@/src/services/processed-events'
 import { getCredentials } from '@/src/services/user-meta'
 import { decryptData } from '@/src/utils/encryption'
-import { hash } from '@/src/utils/hasher'
 import { createAppLogger } from '@/src/utils/logger'
 import { withSentrySpan } from '@/src/utils/sentry'
 
@@ -29,16 +25,6 @@ const TRIP_EVENT_GAP = 5 * 60 // 5 min
 const moduleLogger = createAppLogger('calendar-webhook')
 
 supertokens.init(getBackendConfig())
-
-const createFirestoreIdForEvent = (userId: string, event: CalendarEvent) => {
-  if (!event.start?.dateTime) {
-    throw new Error(`start.dateTime does not exist for the event ${event.id}`)
-  }
-  const string = [userId, event.id, event.start.dateTime, event.location].join(
-    '-'
-  )
-  return hash(string)
-}
 
 export default async function calendarWebhook(
   req: NextApiRequest & Request,
@@ -106,19 +92,20 @@ export default async function calendarWebhook(
       return
     }
 
-    const firestoreDocId = createFirestoreIdForEvent(userId, event)
-
     const { doc, eventRef } = await getEventDoc(userId, event)
 
-    const firestoreLogger = eventLogger.child({ firestoreDocId })
+    const firestoreLogger = eventLogger.child({ firestoreDocId: doc.id })
 
     if (doc.exists) {
-      if (doc.data()?.hash === createEventHash(event)) {
+      const docData = doc.data() as ProcessedEvent
+
+      if (docData.hash === createEventHash(event)) {
         firestoreLogger.info(
           'Firestore doc already exists for current event version, skipping'
         )
         return
       }
+
       firestoreLogger.debug(
         'Firestore doc exists for the outdated version of the event, processsing'
       )
@@ -126,47 +113,74 @@ export default async function calendarWebhook(
       firestoreLogger.debug('No doc for event found in firestore, processing')
     }
 
-    const arrivalTimestamp =
-      Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
+    let newEventData: ProcessedEvent
+    const data = doc.data() as ProcessedEvent | undefined
 
-    const duration = await withSentrySpan(
-      () =>
-        getTripDuration(
-          backendEnv.HOME_LOCATION,
-          event.location as string,
-          arrivalTimestamp,
-          userId
-        ),
-      'maps',
-      'get trip duration'
-    )
-
-    const startTimestamp = arrivalTimestamp - duration
-    const startDate = new Date(startTimestamp * 1000)
-    const endDate = new Date(arrivalTimestamp * 1000)
-
-    const possiblePlaceName = event.location.split(',')[0]
-
-    const tripEventId = await withSentrySpan(
-      () =>
-        calendarService.createTripEvent(startDate, endDate, possiblePlaceName),
-      'calendar',
-      'create trip event'
-    )
-
-    if (doc.exists) {
-      const data = doc.data() as ProcessedEvent
+    if (doc.exists && data && !data.deleted) {
       await calendarService.deleteTripEvent(data.tripEventId)
     }
 
-    await withSentrySpan(
-      () =>
-        eventRef.set({
+    if (event.status === 'cancelled') {
+      if (!doc.exists || !data) {
+        firestoreLogger.warn(
+          'Out of sync: firestore doc does not exist for the already cancelled event'
+        )
+        return
+      }
+      if (!data.deleted) {
+        firestoreLogger.debug('Event is cancelled, marking event as deleted')
+        newEventData = {
           processed: true,
-          deleted: false,
+          deleted: true,
           hash: createEventHash(event),
-          tripEventId,
-        }),
+          tripEventId: null,
+        }
+      }
+    } else {
+      firestoreLogger.debug(
+        `${doc.exists ? 'Updating' : 'Creating'} firestore doc for the event`
+      )
+      const arrivalTimestamp =
+        Date.parse(event.start.dateTime) / 1000 - TRIP_EVENT_GAP
+
+      const duration = await withSentrySpan(
+        () =>
+          getTripDuration(
+            backendEnv.HOME_LOCATION,
+            event.location as string,
+            arrivalTimestamp,
+            userId
+          ),
+        'maps',
+        'get trip duration'
+      )
+
+      const startTimestamp = arrivalTimestamp - duration
+      const startDate = new Date(startTimestamp * 1000)
+      const endDate = new Date(arrivalTimestamp * 1000)
+
+      const possiblePlaceName = event.location.split(',')[0]
+
+      const tripEventId = await withSentrySpan(
+        () =>
+          calendarService.createTripEvent(
+            startDate,
+            endDate,
+            possiblePlaceName
+          ),
+        'calendar',
+        'create trip event'
+      )
+
+      newEventData = {
+        processed: true,
+        deleted: false,
+        hash: createEventHash(event),
+        tripEventId,
+      }
+    }
+    await withSentrySpan(
+      () => eventRef.set(newEventData),
       'firestore',
       'save event'
     )

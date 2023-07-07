@@ -119,7 +119,7 @@ export class GoogleCalendarService {
       calendarId: 'primary',
       timeMin: new Date().toISOString(),
       updatedMin: fiveMinBefore.toISOString(),
-      showDeleted: false,
+      showDeleted: true,
     })
     const items = response.data.items || []
     this.logger.info(`Got ${items.length} recently changed event(s)`)
@@ -167,11 +167,18 @@ export class GoogleCalendarService {
   async deleteTripEvent(id: string) {
     this.logger.debug({ eventId: id }, 'Deleting trip event')
 
-    await this.client.events.delete({
-      calendarId: 'primary',
-      eventId: id,
-    })
-
-    this.logger.info({ eventId: id }, 'Deleted trip event')
+    try {
+      await this.client.events.delete({
+        calendarId: 'primary',
+        eventId: id,
+      })
+      this.logger.info({ eventId: id }, 'Deleted trip event')
+    } catch (e) {
+      if (e instanceof Error && e.message === 'Resource has been deleted') {
+        this.logger.info({ eventId: id }, 'Trip event already deleted')
+      } else {
+        throw e
+      }
+    }
   }
 }
