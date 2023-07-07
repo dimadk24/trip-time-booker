@@ -74,7 +74,7 @@ export default async function calendarWebhook(
     logger.info('Received event for removed resource, skipping')
     return res.status(200).send('OK')
   } else if (resourceState === 'exists') {
-    logger.info('Received event for new resouce, processing')
+    logger.info('Received event for existing resouce, processing')
   } else {
     logger.error({ resourceState }, INVALID_RESOURCE_STATE)
     return res.status(400).send(INVALID_RESOURCE_STATE)
