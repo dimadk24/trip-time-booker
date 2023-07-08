@@ -29,3 +29,7 @@ export const withSentrySpan = async <T>(
     span.finish()
   }
 }
+
+export const setSentryUser = (userId: string) => {
+  Sentry.setUser({ id: userId })
+}

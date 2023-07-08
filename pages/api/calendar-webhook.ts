@@ -14,7 +14,7 @@ import {
 import { getCredentials } from '@/src/services/user-meta'
 import { decryptData } from '@/src/utils/encryption'
 import { createAppLogger } from '@/src/utils/logger'
-import { withSentrySpan } from '@/src/utils/sentry'
+import { setSentryUser, withSentrySpan } from '@/src/utils/sentry'
 
 const INVALID_CHANNEL_TOKEN = 'Invalid channel token'
 const INVALID_RESOUCE_ID = 'Invalid x-goog-resource-id header'
@@ -50,6 +50,7 @@ export default async function calendarWebhook(
     return res.status(401).send(INVALID_CHANNEL_TOKEN)
   }
   const logger = moduleLogger.child({ userId })
+  setSentryUser(userId)
 
   const resourceState = headers['x-goog-resource-state']
 

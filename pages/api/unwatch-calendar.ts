@@ -11,6 +11,7 @@ import {
   setUserMeta,
 } from '@/src/services/user-meta'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
+import { setSentryUser } from '@/src/utils/sentry'
 
 type ResponseData = {
   message: string
@@ -33,6 +34,7 @@ export default async function watchCalendar(
     return res.status(400).json({ message: 'No session provided' })
 
   const userId = req.session.getUserId()
+  setSentryUser(userId)
 
   const credentials = await getCredentials(userId)
   const { calendarWebhookId, calendarWebhookResourceId } =
