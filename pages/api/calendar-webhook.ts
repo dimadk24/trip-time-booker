@@ -63,7 +63,7 @@ export default async function calendarWebhook(
   } else if (resourceState === 'exists') {
     logger.info('Received event for existing resouce, processing')
   } else {
-    logger.error({ resourceState }, INVALID_RESOURCE_STATE)
+    logger.warn({ resourceState }, INVALID_RESOURCE_STATE)
     return res.status(400).send(INVALID_RESOURCE_STATE)
   }
 
