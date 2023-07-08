@@ -71,7 +71,6 @@ export const getCredentials = async (
   const metadata = await getUserMeta(userId)
   if (!metadata.googleOAuthRefreshToken) {
     const NO_REFRESH_TOKEN = 'No google refresh token in user meta'
-    logger.error({ userId }, NO_REFRESH_TOKEN)
     throw new Error(NO_REFRESH_TOKEN)
   }
   return { refresh_token: decryptData(metadata.googleOAuthRefreshToken) }
