@@ -38,10 +38,10 @@ export const getUserMeta = async (userId: string): Promise<UserMetaData> => {
       const docRef = await doc.get()
       if (!docRef.exists) {
         await doc.set(initialData)
-        userLogger.info('UserMeta doc did not exist, created')
+        userLogger.debug('UserMeta doc did not exist, created')
         return initialData
       }
-      userLogger.info('Got user meta')
+      userLogger.debug('Got user meta')
       return docRef.data() as UserMetaData
     },
     'user-meta',
@@ -62,7 +62,7 @@ export const setUserMeta = async (
     'set user meta'
   )
 
-  userLogger.info('Set user meta')
+  userLogger.debug('Set user meta')
 }
 
 export const getCredentials = async (
