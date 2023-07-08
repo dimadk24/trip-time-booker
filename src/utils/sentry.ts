@@ -1,13 +1,9 @@
 import * as Sentry from '@sentry/nextjs'
 import { frontendEnv } from '../config/frontend-env'
-import { createAppLogger } from './logger'
-
-const logger = createAppLogger('sentry')
 
 const getSentryTransaction = () => {
   const transaction = Sentry.getCurrentHub().getScope().getTransaction()
   if (!transaction) {
-    logger.error('No Sentry transaction')
     throw new Error('No sentry transaction')
   }
   return transaction
