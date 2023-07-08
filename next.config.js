@@ -2,6 +2,16 @@ const { withSentryConfig } = require('@sentry/nextjs')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+    // eslint checks are run on CI
+    // no need to perform them during build time too
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+    // typescript checks are run on CI
+    // no need to perform them during build time too
+  },
   experimental: {
     appDir: false,
   },
