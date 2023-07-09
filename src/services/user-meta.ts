@@ -5,16 +5,20 @@ import { backendEnv } from '../config/backend-env'
 import { withSentrySpan } from '../utils/sentry'
 import { firestore } from './firestore'
 
+type WebhookStatus = 'not_active' | 'activating' | 'active'
+
 type UserMetaData = {
   googleOAuthRefreshToken: string | null
   calendarWebhookId: string | null
   calendarWebhookResourceId: string | null
+  webhookStatus: WebhookStatus | null
 }
 
 const initialData = {
   googleOAuthRefreshToken: null,
   calendarWebhookId: null,
   calendarWebhookResourceId: null,
+  webhookStatus: null,
 }
 
 export const USERS_COLLECTIONS =
