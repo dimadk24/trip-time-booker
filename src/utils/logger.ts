@@ -2,8 +2,8 @@ import os from 'os'
 import pino from 'pino'
 import { backendEnv } from '../config/backend-env'
 
-const targets: (pino.TransportTargetOptions | string)[] = [
-  {
+const targets: (pino.TransportTargetOptions | string | boolean)[] = [
+  backendEnv.NODE_ENV !== 'production' && {
     target: 'pino-pretty',
     options: {},
     level: backendEnv.LOG_LEVEL,
