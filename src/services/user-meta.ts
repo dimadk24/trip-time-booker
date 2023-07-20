@@ -36,16 +36,16 @@ export const getUserMeta = async (userId: string): Promise<UserMetaData> => {
   return withSentrySpan(
     async () => {
       const userLogger = logger.child({ userId })
-      userLogger.debug('Getting user meta')
+      userLogger.trace('Getting user meta')
 
       const doc = getUsersCollection().doc(userId)
       const docRef = await doc.get()
       if (!docRef.exists) {
         await doc.set(initialData)
-        userLogger.debug('UserMeta doc did not exist, created')
+        userLogger.trace('UserMeta doc did not exist, created')
         return initialData
       }
-      userLogger.debug('Got user meta')
+      userLogger.trace('Got user meta')
       return docRef.data() as UserMetaData
     },
     'user-meta',
@@ -58,7 +58,7 @@ export const setUserMeta = async (
   data: Partial<UserMetaData>
 ) => {
   const userLogger = logger.child({ userId })
-  userLogger.debug('Setting user meta')
+  userLogger.trace('Setting user meta')
 
   await withSentrySpan(
     () => getUsersCollection().doc(userId).set(data, { merge: true }),
@@ -66,7 +66,7 @@ export const setUserMeta = async (
     'set user meta'
   )
 
-  userLogger.debug('Set user meta')
+  userLogger.trace('Set user meta')
 }
 
 export const getCredentials = async (
