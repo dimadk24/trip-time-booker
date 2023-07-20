@@ -4,6 +4,7 @@ import { backendEnv } from '../config/backend-env'
 import { createAppLogger } from '../utils/logger'
 import { encryptData } from '../utils/encryption'
 import { frontendEnv } from '../config/frontend-env'
+import { sendNotification } from './notifications'
 
 const WEBHOOK_DOMAIN =
   backendEnv.NODE_ENV === 'development'
@@ -49,20 +50,37 @@ export class GoogleCalendarService {
     this.logger = logger.child({ userId })
   }
 
+  async withPossibleAuthFailure<T>(fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn()
+    } catch (e) {
+      this.logger.debug(e, 'Request error')
+      if (e instanceof Error && e.message.includes('invalid_grant')) {
+        await sendNotification(
+          `Need to login again, please open ${frontendEnv.NEXT_PUBLIC_APP_DOMAIN}?relogin=true`
+        )
+        this.logger.debug('Sent relogin notification')
+      }
+      throw e
+    }
+  }
+
   async registerWebhook() {
     this.logger.debug('Registering calendar webhook')
 
     const webhookURL = `${WEBHOOK_DOMAIN}/api/calendar-webhook`
 
-    const { data } = await this.client.events.watch({
-      calendarId: 'primary',
-      requestBody: {
-        id: webhookName,
-        token: encryptData(this.userId),
-        type: 'webhook',
-        address: webhookURL,
-      },
-    })
+    const { data } = await this.withPossibleAuthFailure(() =>
+      this.client.events.watch({
+        calendarId: 'primary',
+        requestBody: {
+          id: webhookName,
+          token: encryptData(this.userId),
+          type: 'webhook',
+          address: webhookURL,
+        },
+      })
+    )
     const { id, resourceId } = data
 
     this.logger.info(
@@ -79,12 +97,14 @@ export class GoogleCalendarService {
   async unregisterWebhook(id: string, resourceId: string) {
     this.logger.debug('Unregistering calendar webhook')
 
-    const { status, data } = await this.client.channels.stop({
-      requestBody: {
-        id,
-        resourceId,
-      },
-    })
+    const { status, data } = await this.withPossibleAuthFailure(() =>
+      this.client.channels.stop({
+        requestBody: {
+          id,
+          resourceId,
+        },
+      })
+    )
     if (status !== 204) {
       this.logger.error(
         {
@@ -115,12 +135,14 @@ export class GoogleCalendarService {
     fiveMinBefore.setMinutes(fiveMinBefore.getMinutes() - 5)
 
     this.logger.debug('Getting recently changed events')
-    const response = await this.client.events.list({
-      calendarId: 'primary',
-      timeMin: new Date().toISOString(),
-      updatedMin: fiveMinBefore.toISOString(),
-      showDeleted: true,
-    })
+    const response = await this.withPossibleAuthFailure(() =>
+      this.client.events.list({
+        calendarId: 'primary',
+        timeMin: new Date().toISOString(),
+        updatedMin: fiveMinBefore.toISOString(),
+        showDeleted: true,
+      })
+    )
     const items = response.data.items || []
     this.logger.info(`Got ${items.length} recently changed event(s)`)
 
@@ -148,10 +170,12 @@ export class GoogleCalendarService {
 
     this.logger.debug('Creating trip event')
 
-    const response = await this.client.events.insert({
-      calendarId: 'primary',
-      requestBody: params,
-    })
+    const response = await this.withPossibleAuthFailure(() =>
+      this.client.events.insert({
+        calendarId: 'primary',
+        requestBody: params,
+      })
+    )
 
     this.logger.info('Successfully created trip event')
     if (typeof response.data.id !== 'string') {
@@ -168,10 +192,12 @@ export class GoogleCalendarService {
     this.logger.debug({ eventId: id }, 'Deleting trip event')
 
     try {
-      await this.client.events.delete({
-        calendarId: 'primary',
-        eventId: id,
-      })
+      await this.withPossibleAuthFailure(() =>
+        this.client.events.delete({
+          calendarId: 'primary',
+          eventId: id,
+        })
+      )
       this.logger.info({ eventId: id }, 'Deleted trip event')
     } catch (e) {
       if (e instanceof Error && e.message === 'Resource has been deleted') {

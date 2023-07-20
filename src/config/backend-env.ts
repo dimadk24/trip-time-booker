@@ -22,6 +22,7 @@ export const backendEnv = cleanEnv(process.env, {
   HOME_LOCATION: str(),
   SECRET_KEY: str(),
   SECRET_INIT_VECTOR: str(),
+  NTFY_KEY: str(),
 
   DEV_LOCAL_WEBHOOK_DOMAIN: url({ default: '' }),
 })
