@@ -29,7 +29,7 @@ const PROCESSED_EVENTS_COLLECTION =
     ? 'processed-events'
     : 'dev-processed-events'
 
-const logger = createAppLogger('user-meta')
+const logger = createAppLogger('user-meta.processed-events')
 
 export const createEventHash = (event: CalendarEvent) => {
   if (!event.start?.dateTime) {
