@@ -61,7 +61,7 @@ export const getEventDoc = async (
     throw new Error('No id for event')
   }
 
-  const userLogger = logger.child({ userId })
+  const userLogger = logger.child({ userId, eventId: event.id })
   userLogger.debug('Getting event doc from firestore')
 
   const eventRef = getEventsCollection(userId).doc(hash(event.id))
