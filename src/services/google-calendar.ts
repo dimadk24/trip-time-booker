@@ -189,7 +189,7 @@ export class GoogleCalendarService {
   }
 
   async deleteTripEvent(id: string) {
-    this.logger.debug({ eventId: id }, 'Deleting trip event')
+    this.logger.debug({ tripEventId: id }, 'Deleting trip event')
 
     try {
       await this.withPossibleAuthFailure(() =>
@@ -198,10 +198,10 @@ export class GoogleCalendarService {
           eventId: id,
         })
       )
-      this.logger.info({ eventId: id }, 'Deleted trip event')
+      this.logger.info({ tripEventId: id }, 'Deleted trip event')
     } catch (e) {
       if (e instanceof Error && e.message === 'Resource has been deleted') {
-        this.logger.info({ eventId: id }, 'Trip event already deleted')
+        this.logger.info({ tripEventId: id }, 'Trip event already deleted')
       } else {
         throw e
       }
