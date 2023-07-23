@@ -17,8 +17,15 @@ module.exports = {
     'airbnb-typescript',
     'prettier',
     'next/core-web-vitals',
+    'plugin:@tanstack/eslint-plugin-query/recommended',
   ],
-  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'jsx-a11y'],
+  plugins: [
+    '@typescript-eslint',
+    'react',
+    'react-hooks',
+    'jsx-a11y',
+    '@tanstack/query',
+  ],
   rules: {
     'max-len': [
       'warn',
