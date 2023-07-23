@@ -11,7 +11,7 @@ import {
   createEventHash,
   getEventDoc,
 } from '@/src/services/processed-events'
-import { getCredentials, setUserMeta } from '@/src/services/user-meta'
+import { getCredentials } from '@/src/services/user-meta'
 import { decryptData } from '@/src/utils/encryption'
 import { createAppLogger } from '@/src/utils/logger'
 import { setSentryUser, withSentrySpan } from '@/src/utils/sentry'
