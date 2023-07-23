@@ -26,6 +26,8 @@ export default async function watchCalendar(
   req: NextApiRequest & SessionRequest,
   res: Response<ResponseData>
 ) {
+  if (req.method !== 'POST')
+    return res.status(400).json({ message: 'Wrong method, use POST' })
   await superTokensNextWrapper(
     async (next) => {
       return verifySession()(req, res, next)
@@ -41,13 +43,12 @@ export default async function watchCalendar(
 
   const { webhookStatus } = await getCalendarWebhookData(userId)
 
-  if (webhookStatus === 'active' || webhookStatus === 'activating') {
+  if (webhookStatus === 'active') {
     logger.warn(
-      "Trying to register calendar webhook while it's already registered or in a process of being registered"
+      "Trying to register calendar webhook while it's already registered"
     )
     return res.status(400).json({
-      message:
-        'Calendar webhook is already registered or in a process of being registered. Unregister it first',
+      message: 'Calendar webhook is already registered. Unregister it first',
     })
   }
 
@@ -59,8 +60,7 @@ export default async function watchCalendar(
   await setUserMeta(userId, {
     calendarWebhookId: id,
     calendarWebhookResourceId: resourceId,
-    webhookStatus: 'activating',
-    // webhook is registered but hasn't received confirming event yet
+    webhookStatus: 'active',
   })
 
   res.status(200).json({ message: 'OK' })
