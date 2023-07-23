@@ -23,6 +23,8 @@ export default async function watchCalendar(
   req: NextApiRequest & SessionRequest,
   res: Response<ResponseData>
 ) {
+  if (req.method !== 'POST')
+    return res.status(400).json({ message: 'Wrong method, use POST' })
   await superTokensNextWrapper(
     async (next) => {
       return verifySession()(req, res, next)

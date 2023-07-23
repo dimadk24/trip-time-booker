@@ -4,28 +4,16 @@ import { verifySession } from 'supertokens-node/recipe/session/framework/express
 import { type SessionRequest } from 'supertokens-node/framework/express'
 import { type Response } from 'express'
 import supertokens from 'supertokens-node'
-import { WebhookStatus, getUserMeta } from '@/src/services/user-meta'
+import { getUserMeta } from '@/src/services/user-meta'
 import { setSentryUser } from '@/src/utils/sentry'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-
-type ResponseData =
-  | {
-      error: false
-      data: {
-        id: string
-        webhookStatus: WebhookStatus
-      }
-    }
-  | {
-      error: true
-      message: string
-    }
+import { UserResponse } from '@/src/types'
 
 supertokens.init(getBackendConfig())
 
 export default async function userApi(
   req: NextApiRequest & SessionRequest,
-  res: Response<ResponseData>
+  res: Response<UserResponse>
 ) {
   await superTokensNextWrapper(
     async (next) => {

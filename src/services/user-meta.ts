@@ -3,9 +3,8 @@ import { decryptData } from '../utils/encryption'
 import { createAppLogger } from '../utils/logger'
 import { backendEnv } from '../config/backend-env'
 import { withSentrySpan } from '../utils/sentry'
+import { WebhookStatus } from '../types'
 import { firestore } from './firestore'
-
-export type WebhookStatus = 'not_active' | 'activating' | 'active'
 
 type UserMetaData = {
   googleOAuthRefreshToken: string | null

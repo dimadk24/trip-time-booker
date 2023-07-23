@@ -56,9 +56,6 @@ export default async function calendarWebhook(
 
   if (resourceState === 'sync') {
     logger.info('Confirmed registration with sync event')
-    await setUserMeta(userId, {
-      webhookStatus: 'active',
-    })
     return res.status(200).send('OK')
   } else if (resourceState === 'not_exists') {
     logger.info('Received event for removed resource, skipping')
