@@ -5,7 +5,7 @@ import { backendEnv } from '../config/backend-env'
 import { withSentrySpan } from '../utils/sentry'
 import { firestore } from './firestore'
 
-type WebhookStatus = 'not_active' | 'activating' | 'active'
+export type WebhookStatus = 'not_active' | 'activating' | 'active'
 
 type UserMetaData = {
   googleOAuthRefreshToken: string | null
@@ -85,10 +85,12 @@ export const getCalendarWebhookData = async (
 ): Promise<{
   calendarWebhookId: string | null
   calendarWebhookResourceId: string | null
+  webhookStatus: WebhookStatus | null
 }> => {
   const metadata = await getUserMeta(userId)
   return {
     calendarWebhookId: metadata.calendarWebhookId,
     calendarWebhookResourceId: metadata.calendarWebhookResourceId,
+    webhookStatus: metadata.webhookStatus,
   }
 }

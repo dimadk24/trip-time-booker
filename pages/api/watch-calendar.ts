@@ -39,16 +39,16 @@ export default async function watchCalendar(
   const userId = req.session.getUserId()
   setSentryUser(userId)
 
-  const { calendarWebhookId, calendarWebhookResourceId } =
-    await getCalendarWebhookData(userId)
+  const { webhookStatus } = await getCalendarWebhookData(userId)
 
-  if (calendarWebhookId || calendarWebhookResourceId) {
+  if (webhookStatus === 'active' || webhookStatus === 'activating') {
     logger.warn(
-      "Trying to register calendar webhook while it's already registered"
+      "Trying to register calendar webhook while it's already registered or in a process of being registered"
     )
-    return res
-      .status(400)
-      .json({ message: 'Calendar webhook is already registered' })
+    return res.status(400).json({
+      message:
+        'Calendar webhook is already registered or in a process of being registered. Unregister it first',
+    })
   }
 
   const credentials = await getCredentials(userId)
@@ -59,6 +59,8 @@ export default async function watchCalendar(
   await setUserMeta(userId, {
     calendarWebhookId: id,
     calendarWebhookResourceId: resourceId,
+    webhookStatus: 'activating',
+    // webhook is registered but hasn't received confirming event yet
   })
 
   res.status(200).json({ message: 'OK' })

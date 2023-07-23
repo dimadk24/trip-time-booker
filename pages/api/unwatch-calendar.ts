@@ -37,13 +37,19 @@ export default async function watchCalendar(
   setSentryUser(userId)
 
   const credentials = await getCredentials(userId)
-  const { calendarWebhookId, calendarWebhookResourceId } =
+  const { calendarWebhookId, calendarWebhookResourceId, webhookStatus } =
     await getCalendarWebhookData(userId)
+
+  if (webhookStatus === 'not_active') {
+    return res
+      .status(400)
+      .json({ message: 'Webhook is not registered, cannot unregister' })
+  }
 
   if (!calendarWebhookId || !calendarWebhookResourceId) {
     return res
       .status(400)
-      .json({ message: 'Webhook is not registered, cannot unregister' })
+      .json({ message: 'Missing webhook id or webhook resouce id' })
   }
 
   const calendarClient = new GoogleCalendarService(credentials, userId)
@@ -56,6 +62,7 @@ export default async function watchCalendar(
   await setUserMeta(userId, {
     calendarWebhookId: null,
     calendarWebhookResourceId: null,
+    webhookStatus: 'not_active',
   })
 
   res.status(200).json({ message: 'OK' })
