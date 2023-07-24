@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'react-toastify'
 import { invalidateUser, useUserQuery } from '@/src/frontend/user-query'
 
 export function MainApp() {
@@ -11,6 +12,12 @@ export function MainApp() {
   const onToggleWebhookSubscription = async () => {
     const apiEndpoint =
       webhookStatus === 'not_active' ? 'watch-calendar' : 'unwatch-calendar'
+    const loadingToastId = toast.info(
+      webhookStatus === 'not_active'
+        ? 'Enabling webhook...'
+        : 'Disabling webhook...',
+      { autoClose: false, position: 'bottom-left' }
+    )
 
     try {
       setUpdating(true)
@@ -25,8 +32,15 @@ export function MainApp() {
       }
 
       await invalidateUser()
+      toast.success(
+        `Successfully ${
+          webhookStatus === 'not_active' ? 'enabled' : 'disabled'
+        } webhook`,
+        { position: 'bottom-left' }
+      )
     } finally {
       setUpdating(false)
+      toast.dismiss(loadingToastId)
     }
   }
 
