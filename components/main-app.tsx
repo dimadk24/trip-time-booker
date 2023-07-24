@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'react-toastify'
+import { XMarkIcon } from './x-mark-icon'
+import { CheckMarkIcon } from './check-mark-icon'
 import { invalidateUser, useUserQuery } from '@/src/frontend/user-query'
 
 export function MainApp() {
@@ -51,7 +53,20 @@ export function MainApp() {
           <span className="text-gray-800 text-lg mr-3">
             Calendar webhook subscription status:
           </span>
-          <span className="px-2 py-0.5 border-2 border-blue-400 rounded-2xl">
+          <span
+            className={`px-2 py-1 border-2 rounded-2xl ${
+              webhookStatus === 'not_active'
+                ? 'border-red-400'
+                : 'border-green-400'
+            }`}
+          >
+            <span style={{ position: 'relative', top: '-1px' }}>
+              {webhookStatus === 'not_active' ? (
+                <XMarkIcon />
+              ) : (
+                <CheckMarkIcon />
+              )}
+            </span>
             {webhookStatus.replace('_', ' ')}
           </span>
         </div>
