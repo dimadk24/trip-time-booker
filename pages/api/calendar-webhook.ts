@@ -2,7 +2,6 @@ import { Response, type Request } from 'express'
 import { NextApiRequest, NextApiResponse } from 'next'
 import supertokens from 'supertokens-node'
 import ThirdPartyNode from 'supertokens-node/recipe/thirdparty'
-import { backendEnv } from '@/src/config/backend-env'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
 import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { getTripDuration } from '@/src/services/google-maps'
@@ -11,7 +10,7 @@ import {
   createEventHash,
   getEventDoc,
 } from '@/src/services/processed-events'
-import { getCredentials } from '@/src/services/user-meta'
+import { getCredentials, getUserMeta } from '@/src/services/user-meta'
 import { decryptData } from '@/src/utils/encryption'
 import { createAppLogger } from '@/src/utils/logger'
 import { setSentryUser, withSentrySpan } from '@/src/utils/sentry'
@@ -76,6 +75,8 @@ export default async function calendarWebhook(
   logger.debug('Validation checks passed, processing event')
 
   const credentials = await getCredentials(userId)
+  const { homeLocation } = await getUserMeta(userId)
+  if (!homeLocation) throw new Error('Home location is not set')
 
   const calendarService = new GoogleCalendarService(credentials, userId)
 
@@ -147,7 +148,7 @@ export default async function calendarWebhook(
       const duration = await withSentrySpan(
         () =>
           getTripDuration(
-            backendEnv.HOME_LOCATION,
+            homeLocation,
             event.location as string,
             arrivalTimestamp,
             userId

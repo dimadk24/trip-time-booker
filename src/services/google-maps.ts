@@ -31,7 +31,7 @@ export const getTripDuration = async (
       ...eventData,
       mode: TravelMode.transit,
       units: UnitSystem.metric,
-      key: backendEnv.GOOGLE_MAPS_API_KEY,
+      key: backendEnv.BACKEND_GOOGLE_MAPS_API_KEY,
     },
     timeout: 1000,
   })
