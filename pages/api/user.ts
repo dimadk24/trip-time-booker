@@ -4,10 +4,10 @@ import { verifySession } from 'supertokens-node/recipe/session/framework/express
 import { type SessionRequest } from 'supertokens-node/framework/express'
 import { type Response } from 'express'
 import supertokens from 'supertokens-node'
-import { getUserMeta } from '@/src/services/user-meta'
+import { getUserMeta, setUserMeta } from '@/src/services/user-meta'
 import { setSentryUser } from '@/src/utils/sentry'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import { UserResponse } from '@/src/types'
+import { PublicUser, UserResponse } from '@/src/types'
 
 supertokens.init(getBackendConfig())
 
@@ -35,7 +35,32 @@ export default async function userApi(
       data: {
         id: userId,
         webhookStatus: userData.webhookStatus || 'not_active',
+        homeLocation: userData.homeLocation || '',
       },
     })
+  }
+
+  if (req.method === 'PUT') {
+    const body = req.body as PublicUser
+    const parsedUser = {
+      webhookStatus: body.webhookStatus,
+      homeLocation: body.homeLocation,
+    }
+
+    const userData = await getUserMeta(userId)
+    if (parsedUser.homeLocation !== userData.homeLocation) {
+      await setUserMeta(userId, {
+        homeLocation: parsedUser.homeLocation,
+      })
+      return res.status(200).send({
+        error: false,
+        data: {
+          id: userId,
+          webhookStatus: userData.webhookStatus || 'not_active',
+          homeLocation: parsedUser.homeLocation || '',
+        },
+      })
+    }
+    res.status(400).send({ error: true, message: 'Home location is the same' })
   }
 }

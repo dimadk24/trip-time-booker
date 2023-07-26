@@ -11,13 +11,15 @@ type UserMetaData = {
   calendarWebhookId: string | null
   calendarWebhookResourceId: string | null
   webhookStatus: WebhookStatus | null
+  homeLocation: string | null
 }
 
-const initialData = {
+const initialData: UserMetaData = {
   googleOAuthRefreshToken: null,
   calendarWebhookId: null,
   calendarWebhookResourceId: null,
-  webhookStatus: null,
+  webhookStatus: 'not_active',
+  homeLocation: '',
 }
 
 export const USERS_COLLECTIONS =

@@ -1,15 +1,75 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { usePlacesWidget } from 'react-google-autocomplete'
+import { Label, TextInput } from 'flowbite-react'
 import { XMarkIcon } from './x-mark-icon'
 import { CheckMarkIcon } from './check-mark-icon'
-import { invalidateUser, useUserQuery } from '@/src/frontend/user-query'
+import {
+  invalidateUser,
+  setUserData,
+  useUserQuery,
+} from '@/src/frontend/user-query'
+import { frontendEnv } from '@/src/config/frontend-env'
+import { UserResponse } from '@/src/types'
+
+const mapsApiKey = frontendEnv.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
 export function MainApp() {
   const { isSuccess, data: user } = useUserQuery()
   const [updating, setUpdating] = useState(false)
 
-  if (!isSuccess) return null
-  const { webhookStatus } = user
+  const onSelectHomeLocation = async (value: string) => {
+    const loadingToastId = toast.info('Saving home location...', {
+      autoClose: false,
+      position: 'bottom-left',
+    })
+
+    try {
+      setUpdating(true)
+
+      const response = await fetch(`/api/user`, {
+        method: 'PUT',
+        body: JSON.stringify({ homeLocation: value }),
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      })
+      const json = (await response.json()) as UserResponse
+      if (json.error) {
+        throw new Error(json.message)
+      }
+      if (!response.ok) {
+        throw new Error(`Request error, response status: ${response.status}`)
+      }
+
+      setUserData(json.data)
+      toast.success(`Successfully saved home location`, {
+        position: 'bottom-left',
+      })
+    } finally {
+      setUpdating(false)
+      toast.dismiss(loadingToastId)
+    }
+  }
+
+  const { ref: autocompleteInputRef } = usePlacesWidget<HTMLInputElement>({
+    apiKey: mapsApiKey,
+    onPlaceSelected: (place) => {
+      onSelectHomeLocation(place.formatted_address)
+    },
+    options: {
+      types: ['address'],
+    },
+  })
+
+  useEffect(() => {
+    if (isSuccess && autocompleteInputRef.current) {
+      autocompleteInputRef.current.value = user.homeLocation
+    }
+  }, [isSuccess, user, autocompleteInputRef])
+
+  const webhookStatus = user?.webhookStatus || 'not_active'
 
   const onToggleWebhookSubscription = async () => {
     const apiEndpoint =
@@ -49,6 +109,30 @@ export function MainApp() {
   return (
     <main className="p-8">
       <div className="flex flex-col items-center justify-center">
+        <div className="max-w-md">
+          <div className="mb-2 block">
+            <Label htmlFor="homeLocation" value="Home location" />
+          </div>
+          <div className="flex mb-4">
+            <TextInput
+              id="homeLocation"
+              ref={autocompleteInputRef}
+              disabled={updating}
+              onBlur={(event) => {
+                if (event.target.value === '' && user?.homeLocation) {
+                  onSelectHomeLocation('')
+                }
+              }}
+            />
+            <button
+              className="ml-2"
+              onClick={() => onSelectHomeLocation('')}
+              disabled={updating || !user?.homeLocation}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
         <div className="mb-6">
           <span className="text-gray-800 text-lg mr-3">
             Calendar webhook subscription status:
