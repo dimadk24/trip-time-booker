@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import { PublicUser, UserResponse } from '../types'
 import { queryClient } from './react-query-client'
@@ -8,17 +9,11 @@ export const useUserQuery = () => {
   return useQuery({
     queryKey: userQueryKey,
     queryFn: async () => {
-      const response = await fetch('/api/user')
-      const json = (await response.json()) as UserResponse
-      if (json.error) {
-        throw new Error(json.message)
+      const { data: responseData } = await axios.get<UserResponse>('/api/user')
+      if (responseData.error) {
+        throw new Error(responseData.message)
       }
-      if (!response.ok) {
-        throw new Error(
-          `User request error, response status: ${response.status}`
-        )
-      }
-      return json.data
+      return responseData.data
     },
     staleTime: Infinity,
   })

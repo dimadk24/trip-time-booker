@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import axios from 'axios'
 import { toast } from 'react-toastify'
 import { usePlacesWidget } from 'react-google-autocomplete'
 import { Label, TextInput } from 'flowbite-react'
@@ -27,24 +28,18 @@ export function MainApp() {
     try {
       setUpdating(true)
 
-      const response = await fetch(`/api/user`, {
-        method: 'PUT',
-        body: JSON.stringify({ homeLocation: value }),
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      })
-      const json = (await response.json()) as UserResponse
-      if (json.error) {
-        throw new Error(json.message)
-      }
-      if (!response.ok) {
-        throw new Error(`Request error, response status: ${response.status}`)
+      const { data: responseData } = await axios.put<UserResponse>(
+        '/api/user',
+        {
+          homeLocation: value,
+        }
+      )
+      if (responseData.error) {
+        throw new Error(responseData.message)
       }
 
-      setUserData(json.data)
-      toast.success(`Successfully saved home location`, {
+      setUserData(responseData.data)
+      toast.success('Successfully saved home location', {
         position: 'bottom-left',
       })
     } finally {
@@ -84,13 +79,11 @@ export function MainApp() {
     try {
       setUpdating(true)
 
-      const response = await fetch(`/api/${apiEndpoint}`, { method: 'POST' })
-      const json = await response.json()
-      if (json.message !== 'OK') {
-        throw new Error(json.message)
-      }
-      if (!response.ok) {
-        throw new Error(`Request error, response status: ${response.status}`)
+      const { data: responseData } = await axios.post<{ message: string }>(
+        `/api/${apiEndpoint}`
+      )
+      if (responseData.message !== 'OK') {
+        throw new Error(responseData.message)
       }
 
       await invalidateUser()
