@@ -5,12 +5,10 @@
 import * as Sentry from '@sentry/nextjs'
 import { ProfilingIntegration } from '@sentry/profiling-node'
 import { frontendEnv } from './src/config/frontend-env'
-import { createAppLogger } from './src/utils/logger'
 // during build nextjs imports this file in frontend
 // therefore need to use frontend env, not backend
 
 if (frontendEnv.NEXT_PUBLIC_SENTRY_DSN) {
-  const logger = createAppLogger('sentry-server')
   Sentry.init({
     dsn: frontendEnv.NEXT_PUBLIC_SENTRY_DSN,
 
@@ -34,7 +32,6 @@ if (frontendEnv.NEXT_PUBLIC_SENTRY_DSN) {
         breadcrumb.data.url.includes('maps/api/distancematrix/')
       ) {
         breadcrumb.data['http.query'] = '**filtered**'
-        logger.debug({}, 'Removed http query data from sentry breadcrumbs')
       }
       return breadcrumb
     },
