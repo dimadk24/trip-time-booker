@@ -1,34 +1,72 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
+<br />
+<div align="center">
+  <a href="https://trip-time-booker.up.railway.app">
+    <img src="assets/logo.png" alt="Logo" width="80" height="80">
+  </a>
+
+<h3 align="center">Trip time booker</h3>
+
+  <p align="center">
+    Application to automatically book time in the google calendar for traveling to the event location
+    <br />
+    <a href="https://trip-time-booker.up.railway.app">Open app</a>
+  </p>
+</div>
+
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#built-with">Built With</a></li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Images used</a></li>
+  </ol>
+</details>
+
+## Demo
+
+  <p align="center">
+    <img src="assets/demo.gif" alt="Demo" width="216" height="480">
+  </p>
+
+## Built With
+
+- [![Next][Next.js]][Next-url]
+- [![React][React.js]][React-url]
 
 ## Getting Started
 
-First, run the development server:
+Just sign in with google on the [trip-time-booker.up.railway.app](https://trip-time-booker.up.railway.app), set home location and enable webhook subscription.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+## Usage
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+When you add new events with the location to your google calendar the app will automatically create events for traveling to the location. The time of the event depends on the distance from your home to the event location.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## License
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Distributed under the MIT License. See `LICENSE.txt` for more information.
 
-## Learn More
+## Contact
 
-To learn more about Next.js, take a look at the following resources:
+Dima Krutolianov - DimaKrutDK@ya.ru
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Images used
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- [Delivery time icon by Icons8](https://icons8.com/icons/set/delivery-time)
 
-## Deploy on Vercel
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[license-shield]: https://img.shields.io/github/license/dimadk24/trip-time-booker.svg?style=for-the-badge
+[license-url]: https://github.com/dimadk24/trip-time-booker/blob/main/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/dimadk24
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
