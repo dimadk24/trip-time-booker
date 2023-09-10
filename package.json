@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "concurrently \"pnpm start:app\" \"pnpm start:cron\" -k",
+    "start:app": "next start",
+    "start:cron": "cron && tail -f /var/log/cron.log",
     "lint": "next lint --max-warnings=0",
     "check-types": "tsc",
     "reformat": "prettier --write .",
@@ -25,6 +27,7 @@
     "@types/react-dom": "18.2.6",
     "autoprefixer": "10.4.14",
     "axios": "1.4.0",
+    "concurrently": "8.2.1",
     "envalid": "7.3.1",
     "eslint": "8.43.0",
     "eslint-config-next": "13.4.7",
