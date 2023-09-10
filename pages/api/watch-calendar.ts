@@ -5,24 +5,16 @@ import { type SessionRequest } from 'supertokens-node/framework/express'
 import { superTokensNextWrapper } from 'supertokens-node/nextjs'
 import { verifySession } from 'supertokens-node/recipe/session/framework/express'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import {
-  getCalendarWebhookData,
-  getCredentials,
-  setUserMeta,
-} from '@/src/services/user-meta'
-import { GoogleCalendarService } from '@/src/services/google-calendar'
-import { createAppLogger } from '@/src/utils/logger'
 import { setSentryUser } from '@/src/utils/sentry'
+import { UserServiceError, watchCalendar } from '@/src/services/user-service'
 
 type ResponseData = {
   message: string
 }
 
-const logger = createAppLogger('watch-calendar')
-
 supertokens.init(getBackendConfig())
 
-export default async function watchCalendar(
+export default async function watchCalendarRoute(
   req: NextApiRequest & SessionRequest,
   res: Response<ResponseData>
 ) {
@@ -41,27 +33,13 @@ export default async function watchCalendar(
   const userId = req.session.getUserId()
   setSentryUser(userId)
 
-  const { webhookStatus } = await getCalendarWebhookData(userId)
-
-  if (webhookStatus === 'active') {
-    logger.warn(
-      "Trying to register calendar webhook while it's already registered"
-    )
-    return res.status(400).json({
-      message: 'Calendar webhook is already registered. Unregister it first',
-    })
+  try {
+    await watchCalendar(userId)
+  } catch (e) {
+    if (e instanceof UserServiceError)
+      return res.status(400).json({ message: e.message })
+    else throw e
   }
 
-  const credentials = await getCredentials(userId)
-  const calendarClient = new GoogleCalendarService(credentials, userId)
-
-  const { id, resourceId } = await calendarClient.registerWebhook()
-
-  await setUserMeta(userId, {
-    calendarWebhookId: id,
-    calendarWebhookResourceId: resourceId,
-    webhookStatus: 'active',
-  })
-
-  res.status(200).json({ message: 'OK' })
+  return res.status(200).json({ message: 'OK' })
 }

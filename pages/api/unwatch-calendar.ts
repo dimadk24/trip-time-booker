@@ -5,13 +5,8 @@ import supertokens from 'supertokens-node'
 import { type SessionRequest } from 'supertokens-node/framework/express'
 import { type Response } from 'express'
 import { getBackendConfig } from '@/src/config/supertokens/backend-config'
-import {
-  getCalendarWebhookData,
-  getCredentials,
-  setUserMeta,
-} from '@/src/services/user-meta'
-import { GoogleCalendarService } from '@/src/services/google-calendar'
 import { setSentryUser } from '@/src/utils/sentry'
+import { UserServiceError, unwatchCalendar } from '@/src/services/user-service'
 
 type ResponseData = {
   message: string
@@ -19,7 +14,7 @@ type ResponseData = {
 
 supertokens.init(getBackendConfig())
 
-export default async function watchCalendar(
+export default async function unwatchCalendarRoute(
   req: NextApiRequest & SessionRequest,
   res: Response<ResponseData>
 ) {
@@ -38,34 +33,13 @@ export default async function watchCalendar(
   const userId = req.session.getUserId()
   setSentryUser(userId)
 
-  const credentials = await getCredentials(userId)
-  const { calendarWebhookId, calendarWebhookResourceId, webhookStatus } =
-    await getCalendarWebhookData(userId)
-
-  if (webhookStatus === 'not_active') {
-    return res
-      .status(400)
-      .json({ message: 'Webhook is not registered, cannot unregister' })
+  try {
+    await unwatchCalendar(userId)
+  } catch (e) {
+    if (e instanceof UserServiceError)
+      return res.status(400).json({ message: e.message })
+    else throw e
   }
 
-  if (!calendarWebhookId || !calendarWebhookResourceId) {
-    return res
-      .status(400)
-      .json({ message: 'Missing webhook id or webhook resouce id' })
-  }
-
-  const calendarClient = new GoogleCalendarService(credentials, userId)
-
-  await calendarClient.unregisterWebhook(
-    calendarWebhookId,
-    calendarWebhookResourceId
-  )
-
-  await setUserMeta(userId, {
-    calendarWebhookId: null,
-    calendarWebhookResourceId: null,
-    webhookStatus: 'not_active',
-  })
-
-  res.status(200).json({ message: 'OK' })
+  return res.status(200).json({ message: 'OK' })
 }

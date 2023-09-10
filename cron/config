@@ -1,0 +1,2 @@
+# on 1 and 15 days of the month
+0 0 1,15 * * bash /app/cron/refresh-webhooks.sh && curl -fsS -m 10 --retry 5 -o /dev/null https://hc-ping.com/5a8a6cd4-11ba-4ae2-ad19-b70fca072a52
