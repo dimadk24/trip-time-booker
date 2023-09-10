@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:expose-webhook": "tmole 3000",
     "build": "next build",
     "start": "concurrently \"pnpm start:app\" \"pnpm start:cron\" -k",
     "start:app": "next start",

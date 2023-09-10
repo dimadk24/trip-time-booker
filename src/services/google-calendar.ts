@@ -11,6 +11,12 @@ const WEBHOOK_DOMAIN =
     ? backendEnv.DEV_LOCAL_WEBHOOK_DOMAIN
     : frontendEnv.NEXT_PUBLIC_APP_DOMAIN
 
+const webhookURL = `${WEBHOOK_DOMAIN}/api/calendar-webhook`
+
+const secondsInDay = 86400
+const msInDay = secondsInDay * 1000
+const webhookExpirationDays = 20 * msInDay
+
 export type Credentials = Parameters<
   InstanceType<(typeof google)['auth']['OAuth2']>['setCredentials']
 >[0]
@@ -68,7 +74,8 @@ export class GoogleCalendarService {
   async registerWebhook() {
     this.logger.debug('Registering calendar webhook')
 
-    const webhookURL = `${WEBHOOK_DOMAIN}/api/calendar-webhook`
+    const now = Date.now()
+    const expiration = now + webhookExpirationDays
 
     const { data } = await this.withPossibleAuthFailure(() =>
       this.client.events.watch({
@@ -78,6 +85,7 @@ export class GoogleCalendarService {
           token: encryptData(this.userId),
           type: 'webhook',
           address: webhookURL,
+          expiration: String(expiration),
         },
       })
     )
@@ -88,6 +96,7 @@ export class GoogleCalendarService {
         webhookResouceId: resourceId,
         webhookURL,
         webhookId: id,
+        expiration,
       },
       'Calendar webhook registered'
     )
