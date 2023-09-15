@@ -1,9 +1,12 @@
+/* eslint-disable no-console */
 import './_load-env'
 import '../sentry.server.config'
+import axios from 'axios'
 import * as Sentry from '@sentry/nextjs'
 import { getUsersCollection } from '@/src/services/user-meta'
 import { unwatchCalendar, watchCalendar } from '@/src/services/user-service'
 import { createAppLogger } from '@/src/utils/logger'
+import { backendEnv } from '@/src/config/backend-env'
 
 const logger = createAppLogger('refresh-webhook')
 
@@ -32,9 +35,22 @@ async function refreshWebhookRegistration() {
   transaction.finish()
 }
 
-refreshWebhookRegistration().catch((err) => {
-  logger.error(err)
-  // eslint-disable-next-line no-console
-  console.error(err)
-  process.exit(1)
-})
+let exitCode = 0
+
+refreshWebhookRegistration()
+  .catch((err) => {
+    logger.error(err)
+    console.error(err)
+    exitCode = 1
+  })
+  .finally(() => {
+    axios
+      .get(`https://hc-ping.com/${backendEnv.REFRESH_WEBHOOK_HEALTLCHECK_ID}`)
+      .catch((err) => {
+        logger.error({ err }, 'Healthchecks ping failed')
+        console.error('Healthchecks ping failed', err)
+      })
+      .finally(() => {
+        process.exit(exitCode)
+      })
+  })
