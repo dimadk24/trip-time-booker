@@ -94,6 +94,16 @@ export default async function calendarWebhook(
       return
     }
 
+    const eventTitle = event.summary || ''
+    if (
+      eventTitle.startsWith('Take transit from') || // created by google maps web https://imgur.com/a/Xa3q45y
+      eventTitle.startsWith('Travel to') || // created by the same google maps feature on the phone
+      eventTitle.startsWith('Trip to the') // created by trip-time-booker
+    ) {
+      eventLogger.debug('Event is a trip event, skipping')
+      return
+    }
+
     const { doc, eventRef } = await getEventDoc(userId, event)
 
     const firestoreLogger = eventLogger.child({ firestoreDocId: doc.id })
