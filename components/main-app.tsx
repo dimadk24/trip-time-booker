@@ -3,6 +3,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { usePlacesWidget } from 'react-google-autocomplete'
 import { Label, TextInput } from 'flowbite-react'
+import clsx from 'clsx'
 import { XMarkIcon } from './x-mark-icon'
 import { CheckMarkIcon } from './check-mark-icon'
 import {
@@ -16,7 +17,7 @@ import { UserResponse } from '@/src/types'
 const mapsApiKey = frontendEnv.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
 export function MainApp() {
-  const { isSuccess, data: user } = useUserQuery()
+  const { isSuccess, data: user, isLoading } = useUserQuery()
   const [updating, setUpdating] = useState(false)
 
   const onSelectHomeLocation = async (value: string) => {
@@ -102,59 +103,65 @@ export function MainApp() {
   return (
     <main className="p-8">
       <div className="flex flex-col items-center justify-center">
-        <div className="max-w-md">
-          <div className="mb-2 block">
-            <Label htmlFor="homeLocation" value="Home location" />
+        {isLoading && <div className="mx-auto">Loading...</div>}
+        <div className={clsx(isLoading && 'hidden')}>
+          {/* Need workaround with display:none
+            because need to render home location input due to
+            https://github.com/ErrorPro/react-google-autocomplete/issues/182 */}
+          <div className="max-w-md">
+            <div className="mb-2 block">
+              <Label htmlFor="homeLocation" value="Home location" />
+            </div>
+            <div className="flex mb-4">
+              <TextInput
+                id="homeLocation"
+                ref={autocompleteInputRef}
+                disabled={updating}
+                onBlur={(event) => {
+                  if (event.target.value === '' && user?.homeLocation) {
+                    onSelectHomeLocation('')
+                  }
+                }}
+              />
+              <button
+                className="ml-2"
+                onClick={() => onSelectHomeLocation('')}
+                disabled={updating || !user?.homeLocation}
+              >
+                Clear
+              </button>
+            </div>
           </div>
-          <div className="flex mb-4">
-            <TextInput
-              id="homeLocation"
-              ref={autocompleteInputRef}
-              disabled={updating}
-              onBlur={(event) => {
-                if (event.target.value === '' && user?.homeLocation) {
-                  onSelectHomeLocation('')
-                }
-              }}
-            />
-            <button
-              className="ml-2"
-              onClick={() => onSelectHomeLocation('')}
-              disabled={updating || !user?.homeLocation}
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-        <div className="mb-6">
-          <span className="text-gray-800 text-lg mr-3">
-            Calendar webhook subscription status:
-          </span>
-          <span
-            className={`px-2 py-1 border-2 rounded-2xl ${
-              webhookStatus === 'not_active'
-                ? 'border-red-400'
-                : 'border-green-400'
-            }`}
-          >
-            <span style={{ position: 'relative', top: '-1px' }}>
-              {webhookStatus === 'not_active' ? (
-                <XMarkIcon />
-              ) : (
-                <CheckMarkIcon />
-              )}
+          <div className="mb-6">
+            <span className="text-gray-800 text-lg mr-3">
+              Calendar webhook subscription status:
             </span>
-            {webhookStatus.replace('_', ' ')}
-          </span>
+            <span
+              className={`px-2 py-1 border-2 rounded-2xl ${
+                webhookStatus === 'not_active'
+                  ? 'border-red-400'
+                  : 'border-green-400'
+              }`}
+            >
+              <span style={{ position: 'relative', top: '-1px' }}>
+                {webhookStatus === 'not_active' ? (
+                  <XMarkIcon />
+                ) : (
+                  <CheckMarkIcon />
+                )}
+              </span>
+              {webhookStatus.replace('_', ' ')}
+            </span>
+          </div>
+          <button
+            onClick={onToggleWebhookSubscription}
+            disabled={updating}
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-2 px-4 rounded-lg"
+          >
+            {webhookStatus === 'not_active' ? 'Enable' : 'Disable'} webhook
+            subscription
+          </button>
         </div>
-        <button
-          onClick={onToggleWebhookSubscription}
-          disabled={updating}
-          className="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white py-2 px-4 rounded-lg"
-        >
-          {webhookStatus === 'not_active' ? 'Enable' : 'Disable'} webhook
-          subscription
-        </button>
       </div>
     </main>
   )
